@@ -19,6 +19,7 @@ Options specified: -v /Data/HG00098.vcf.gz -c Data/catalogFile.docker -d Data/dr
 ```
 > Make sure `pwd` contains the following elements
 
+
 Data/
 	references/
 		hg19.fa.gz
