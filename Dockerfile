@@ -79,7 +79,7 @@ RUN wget http://www.well.ox.ac.uk/bioinformatics/Software/Cava-full-latest.tgz
 RUN tar xvzf Cava-full-latest.tgz
 RUN rm Cava-full-latest.tgz
 RUN cd cava-v1.0.0/
-RUN perl -pi -e 's/hg19.fa/\/Data\/references\/hg19.fa.gz/;s/exome_65_GRCh37.gz/cava-v1.0.0\/exome_65_GRCh37.gz/;s/dbSNP138.gz/\./' cava-v1.0.0/config.txt
+RUN perl -pi -e 's/hg19.fa/\/Data\/references\/hg19.fa/;s/exome_65_GRCh37.gz/\/cava-v1.0.0\/exome_65_GRCh37.gz/;s/dbSNP138.gz/\./' cava-v1.0.0/config.txt
 RUN cd /
 
 #####################################################
