@@ -30,21 +30,20 @@ cat << EOF
 ##      -j    job name for qsub command
 ##      -l    set logging
 ##      -L    Do not add links to VCF [default is set to TRUE]
-##      -M    memory info file from GGPS
+##      -M    memory info file
 ##      -n    Number of lines to split the data into  [default:20000]
 ##      -O    output directory [cwd]
 ##      -q    Flag to turn on SNPEFF
-##      -s    Flag to turn on SAVANT annotation
 ##      -a    Flag to turn off CAVA annotation
 ##      -Q    queue override (e.g. 1-day) [defaults to what is in the tool_info]
 ##      -t    Export table as well as VCF [1]
 ##				Version 1: Seperate columns for Depth, GQ, AD, and GT per sample
 ##				Version 2: First N columns like VCF, one colulmn containing sample names
-##      -T    tool info file from GGPS
+##      -T    tool info file 
 ##      -x    path to temp directory [default: cwd]
 ##
 ##
-##	Clinical specific options (DLMP use only)
+##	Clinical specific options 
 ##      -P    PEDIGREE file (for trios only, this will add extra annotations)
 ##      -g    GENE list (only used with pedigrees)
 
@@ -196,8 +195,8 @@ Using the following configuration files for this run:
   Memory info:  $memory_info
 
 EOF
-exec 3>&2
-exec 2> /dev/null
+#exec 3>&2
+#exec 2> /dev/null
 source ${tool_info}
 source ${memory_info}
 
@@ -534,7 +533,7 @@ done
 ##################################################################################
 args="$SGE -cwd -q $QUEUE -m $NOTIFICATION_OPTION -notify -M $EMAIL -l h_stack=$SGE_STACK"
 #Option to run off SGE
-exec 2>&3
+#exec 2>&3
 if [ "$QUEUE" == "NA" ]
 then
 	for x in ${CWD_VCF}[0-9][0-9][0-9]

@@ -85,20 +85,20 @@ then
 	fi
 fi
 
-if [ "$runsavant" == "TRUE" ]
-then
-  echo "Running SAVANT"
-	$PYTHON/python $SAVANT -c $SAVANT_CONFIG -i $CWD_VCF -o $CWD_VCF.tmp
-	cat $CWD_VCF.tmp.vcf |$PERL $SAVANT_PARSE - |$PERL -pne 's/\s\n/\n/' > $CWD_VCF.tmp2.vcf
-	mv $CWD_VCF.tmp2.vcf $CWD_VCF.tmp.vcf
-	END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp.vcf |wc -l|cut -f1 -d" "`
-	if [ ! "$END_NUM" -ge "$START_NUM" ];
-	then 
-		echo  "${CWD_VCF}.savant has insufficient number of rows. SAVANT Failed" >> ../err.log;
-    	exit 100;
-	fi
-	mv $CWD_VCF.tmp.vcf $CWD_VCF
-fi
+# if [ "$runsavant" == "TRUE" ]
+# then
+#   echo "Running SAVANT"
+# 	$PYTHON/python $SAVANT -c $SAVANT_CONFIG -i $CWD_VCF -o $CWD_VCF.tmp
+# 	cat $CWD_VCF.tmp.vcf |$PERL $SAVANT_PARSE - |$PERL -pne 's/\s\n/\n/' > $CWD_VCF.tmp2.vcf
+# 	mv $CWD_VCF.tmp2.vcf $CWD_VCF.tmp.vcf
+# 	END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp.vcf |wc -l|cut -f1 -d" "`
+# 	if [ ! "$END_NUM" -ge "$START_NUM" ];
+# 	then 
+# 		echo  "${CWD_VCF}.savant has insufficient number of rows. SAVANT Failed" >> ../err.log;
+#     	exit 100;
+# 	fi
+# 	mv $CWD_VCF.tmp.vcf $CWD_VCF
+# fi
 
 if [ "$runCAVA" == "TRUE" ]
 then
