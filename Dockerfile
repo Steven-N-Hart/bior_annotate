@@ -72,20 +72,17 @@ RUN wget -O cava-v1.0.0/hg19.fa.gz.fai ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/
 RUN perl -pi -e 's/hg19.fa/hs37d5.fa.gz/' cava-v1.0.0/config.txt
 RUN cd /
 
-
 #####################################################
 # Install SNPEFF
 #####################################################
 RUN wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip
 RUN unzip snpEff_latest_core.zip
-
-
+RUN rm snpEff_latest_core.zip
 
 #####################################################
 # Get VCF File
 #####################################################
-#wget https://s3-us-west-2.amazonaws.com/mayo-bic-tools/variant_miner/vcfs/HG00098.vcf.gz
-#rm snpEff_latest_core.zip
+RUN wget https://s3-us-west-2.amazonaws.com/mayo-bic-tools/variant_miner/vcfs/HG00098.vcf.gz
 
 #####################################################
 # Get bior_annotate
