@@ -1,0 +1,3 @@
+source /projects/bsi/bictools/scripts/dnaseq/GENOME_GPS/tags/3.0/config/memory_info.txt
+#If you have any defaults you want to override, specify them below this line
+
