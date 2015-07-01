@@ -79,20 +79,20 @@ RUN wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip
 RUN unzip snpEff_latest_core.zip
 RUN rm snpEff_latest_core.zip
 
+
+#####################################################
+# Get Bedtools
+#####################################################
+
+RUN git clone https://github.com/arq5x/bedtools2.git
+RUN cd /bedtools2/ && make && make install
+ENV PATH=$PATH:/bedtools2/bin
+RUN cd /
+
+
+
 #####################################################
 # Get VCF File
 #####################################################
-RUN wget https://s3-us-west-2.amazonaws.com/mayo-bic-tools/variant_miner/vcfs/HG00098.vcf.gz
-
-#####################################################
-# Get bior_annotate
-#####################################################
-#git-svn clone --username m087494  https://bsisvn.mayo.edu/main/personal/hart_steven_m087494/bior_annotate/trunk
-
-
-
-#https://github.com/arq5x/bedtools2.git
-
-
-
+#RUN wget https://s3-us-west-2.amazonaws.com/mayo-bic-tools/variant_miner/vcfs/HG00098.vcf.gz
 
