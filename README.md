@@ -20,15 +20,15 @@ Options specified: -v /Data/HG00098.vcf.gz -c Data/catalogFile.docker -d Data/dr
 > Make sure `pwd` contains the following elements
 
 
-Data/
-	references/
-		hg19.fa.gz
-		hg19.fa.gz.fai
+	Data/
+		references/
+			hg19.fa.gz
+			hg19.fa.gz.fai
 
-	catalogs/
-		2015_05_18/
-			noTCGA_ExAc.datasource.properties
-			noTCGA_ExAc.columns.tsv
-			noTCGA_ExAc.tsv.bgz.tbi
-			noTCGA_ExAc.tsv.bgz
-			Protocol.sh
+		catalogs/
+			2015_05_18/
+				noTCGA_ExAc.datasource.properties
+				noTCGA_ExAc.columns.tsv
+				noTCGA_ExAc.tsv.bgz.tbi
+				noTCGA_ExAc.tsv.bgz
+				Protocol.sh
