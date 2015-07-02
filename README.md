@@ -2,9 +2,9 @@
 
 ### Prerequisties
 #### Download Reference files
-curl -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz 
-gunzip references/hg19.fa.gz > references/hg19.fa
-samtools faidx references/hg19.fa
+* curl -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz 
+* gunzip references/hg19.fa.gz > references/hg19.fa
+* samtools faidx references/hg19.fa
 
 
 
@@ -17,12 +17,8 @@ $ docker build -t stevenhart/bior_annotate:latest .
 $ docker run -it --rm -v `pwd`:/Data stevenhart/bior_annotate:latest
 $ cd Data
 $ sh trunk/bior_annotate.sh -v HG00098.vcf.gz -c catalogFile.docker -d drillFile.docker -T tool_info.minimal.txt -o TEST  -M trunk/config/memory_info.txt -l
-
-
-
 ```
-> Make sure `pwd` contains the following elements
-
+> For this demo, make sure `pwd` contains the following elements
 
 	Data/
 		references/
