@@ -15,8 +15,10 @@ $ docker build -t stevenhart/bior_annotate:latest .
 ### Launch
 ```
 $ docker run -it --rm -v `pwd`:/Data stevenhart/bior_annotate:latest
+$ cd Data
+$ sh trunk/bior_annotate.sh -v HG00098.vcf.gz -c catalogFile.docker -d drillFile.docker -T tool_info.minimal.txt -o TEST  -M trunk/config/memory_info.txt -l
 
-$ sh Data/trunk/bior_annotate.sh -v /Data/HG00098.vcf.gz -c Data/catalogFile.docker -d Data/drillFile.docker -T /Data/tool_info.minimal.txt -o TEST  -M Data/trunk/config/memory_info.txt -l
+
 
 ```
 > Make sure `pwd` contains the following elements

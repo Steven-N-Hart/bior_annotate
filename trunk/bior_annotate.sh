@@ -401,8 +401,8 @@ NUM_CATALOGS_TO_DRILL=`awk 'END{print NR }' $drills`
 # Create script to annotate the VCF
 cat << EOF >> annotate.sh
 #!/usr/bin/env bash
-exec 3>&2
-exec 2> /dev/null
+#exec 3>&2
+#exec 2> /dev/null
 source $BIOR_PROFILE
 source $tool_info
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh

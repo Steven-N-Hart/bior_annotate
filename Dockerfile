@@ -25,17 +25,10 @@ RUN yum install -y \
 	wget \
 	zlib-devel 
 
-#####################################################
-# Install Python2.7
-#####################################################
-#RUN wget https://www.python.org/ftp/python/2.7/Python-2.7.tgz
-#RUN tar xvzf Python-2.7.tgz
-
 
 #####################################################
 # Install htslib
 #####################################################
-RUN cd /home
 RUN git clone https://github.com/samtools/htslib.git 
 RUN cd htslib && make && make install
 
@@ -45,14 +38,16 @@ RUN cd htslib && make && make install
 RUN cd /
 RUN wget https://s3-us-west-2.amazonaws.com/mayo-bic-tools/bior/bior_2.1.1.tar.gz \
 	&& tar xvzf bior_2.1.1.tar.gz  \
-	&& cp bior_2.1.1/bin/* /usr/bin/ \
 	&& rm -f bior_2.1.1.tar.gz
-ENV BIOR_LITE_HOME=/bior_2.1.1/
-RUN echo -e "BIOR_LITE_HOME=/home/bior_2.1.1/\nexport $BIOR_LITE_HOME" > bior_2.1.1/PKG_PROFILE
+ENV PATH=$PATH:/bior_2.1.1/bin
+ENV BIOR_LITE_HOME=/bior_2.1.1
+RUN echo "export BIOR_LITE_HOME=/bior_2.1.1" > bior_2.1.1/PKG_PROFILE
+
 
 #####################################################
 # Install SAMtools
 #####################################################
+RUN cd / 
 RUN git clone https://github.com/samtools/samtools.git
 RUN cd samtools && make && make install && cd /
 ENV PATH=$PATH:/samtools/
