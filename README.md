@@ -18,6 +18,8 @@ $ docker run -it --rm -v `pwd`:/Data stevenhart/bior_annotate:latest
 $ cd Data
 $ sh trunk/bior_annotate.sh -v HG00098.vcf.gz -c catalogFile.docker -d drillFile.docker -T tool_info.minimal.txt -o TEST  -M trunk/config/memory_info.txt -l
 ```
+* Note for wondows, you will need to use `$ docker run -it --rm -v //c/UserS/m087494/Desktop/bior_annotate:/Data stevenha
+rt/bior_annotate:latest`
 > For this demo, make sure `pwd` contains the following elements
 
 	Data/
