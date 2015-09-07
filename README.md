@@ -13,7 +13,7 @@ $ docker build -t stevenhart/bior_annotate:latest .
 ```
 ### Launch
 ```
-$ docker run -it --rm -v `pwd`:/Data stevenhart/bior_annotate:latest
+$ docker run -it --rm -v $PWD:/Data stevenhart/bior_annotate:latest
 $ cd Data
 $ sh trunk/bior_annotate.sh -v HG00098.vcf.gz -c catalogFile.docker -d drillFile.docker -T tool_info.minimal.txt -o TEST  -M trunk/config/memory_info.txt -l
 ```
