@@ -1,0 +1,239 @@
+## path to all the tools and references to run workflow
+### no change
+### DEBUG MODE (YES, keeps all the intermediate files)
+DEBUG_MODE=YES
+
+##references
+REF_GENOME="/dlmp/misc-data/reference/ggpsReferences/genomes/withMT/hs37d5.chr.fa"
+BWA_REF="NA"
+KGENOME_REF="/dlmp/misc-data/reference/ggpsReferences/annotation/1000G_phase1.snps.high_confidence.hg19.vcf.gz"
+DBSNP_VCF="/dlmp/misc-data/reference/ggpsReferences/annotation/dbsnp_137.hg19.vcf.gz"
+HAPMAP_VCF="/dlmp/misc-data/reference/ggpsReferences/annotation/hapmap_3.3.hg19.sites.vcf.gz"
+OMNI_VCF="/dlmp/misc-data/reference/ggpsReferences/annotation/1000G_omni2.5.hg19.vcf.gz"
+NOVO_REF="/dlmp/misc-data/reference/ggpsReferences/genomes/withMT/hs37d5.chr.ndx"
+MILLS_REF="/dlmp/misc-data/reference/ggpsReferences/annotation/Mills_and_1000G_gold_standard.indels.hg19.vcf.gz"
+BLAT_ED_REF="/dlmp/misc-data/reference/ggpsReferences/annotation/allsitesED.vcf.gz"
+BLAT_REF="NA"
+BLACKLIST_SOFTSEARCH="NA"
+REF_FLAT="/dlmp/misc-data/reference/ggpsReferences/annotation/refFlat.txt"
+
+## exome samples
+CAPTUREKIT="/dlmp/misc-data/reference/ggpsReferences/exome/ontarget_20150407.bed"
+ONTARGET="/dlmp/misc-data/reference/ggpsReferences/exome/ontarget_20150407.bed"
+STANDARDVCF="/dlmp/misc-data/reference/ggpsReferences/utilities/NISTIntegratedCalls_14datasets_131103_allcall_UGHapMerge_HetHomVarPASS_VQSRv2.18_all_nouncert_excludesimplerep_excludesegdups_excludedecoy_excludeRepSeqSTRs_noCNVs.vcf.gz"
+STANDARDBED="/dlmp/misc-data/reference/ggpsReferences/utilities/OfficialTargets.bed"
+
+### annotation
+BIOR="/dlmp/sandbox/scripts/ngs_core/bior/pipeline/bin/"
+BIOR_CATALOGS="/dlmp/sandbox/cgslIS/Jag/WESTA/bior_annotate/v2.5/config/catalog_file.dlmp"
+BIOR_DRILLS="/dlmp/sandbox/cgslIS/Jag/WESTA/bior_annotate/v2.5/config/drill_file.dlmp"
+BIOR_PROFILE="/dlmp/sandbox/scripts/ngs_core/bior/PKG_PROFILE"
+CAVA="/dlmp/sandbox/scripts/ngs_core/cava/1.1.1.mayo/cava.py"
+CAVA_CONFIG="/dlmp/sandbox/scripts/ngs_core/cava/1.1.1.mayo/config.txt"
+SAVANT="/dlmp/sandbox/scripts/ngs_core/savant/savant.py"
+SAVANT_CONFIG="/dlmp/sandbox/scripts/ngs_core/savant/config.txt"
+SNPEFF="/biotools/biotools/snpeff/4.0/"
+SNPEFF_DB="GRCh37.74"
+SNPEFF_params="-noStats -canon -hgvs -lof -ud 1 -noLog"
+bior_annotate_params="-s"
+
+### aligners
+BWA="NA"
+NOVOALIGN="/biotools/biotools/novoalign/V3.02.04"
+BLAT="NA"
+### callers
+SNVmix="NA"
+SOMATIC_SNIPER="NA"
+JOINTSNVMIX="NA"
+MUTECT="NA"
+
+### executables
+SGE="/usr/local/biotools/oge/ge2011.11/bin/linux-x64/qsub"
+PERL="/usr/local/biotools/perl/5.16.2/bin/perl"
+R="/usr/local/biotools/r/3.1.1/bin"
+JAVA6="/biotools/biotools/java/jdk1.6.0_33/bin/"
+JAVA7="/biotools/biotools/java/jdk1.7.0_72/bin/"
+PYTHON="/biotools/biotools/python/2.7.3/bin"
+BASH="/bin/bash"
+GUNZIP="/bin/gunzip"
+GZIP="/bin/gzip"
+MAIL="/bin/mailx"
+TAR="/bin/tar"
+FIND="/bin/find"
+FINGER="/usr/bin/finger"
+
+#### misc tools
+BEDTOOLS="/biotools/biotools/bedtools/2.20.1/bin"
+FASTQC="/biotools/biotools/fastqc/0.11.2/FastQC/"
+
+###all other modules of GATK
+GATK="/biotools/biotools/gatk/3.3.0"
+###to run somatic indel detector
+GATK_OLD="/biotools/biotools/gatk/1.6-9-g47df7bb"
+### to run GVCF tool, modified version of GATK
+#### TODO: Note from MTK: Waiting on license concerns for GATK_GVCF
+GATK_GVCF="NA"
+
+### misc tools
+NOVOSORT="/biotools/biotools/novoalign/V3.02.04/novosort"
+PICARD="/biotools/biotools/picard/1.119"
+SAMTOOLS="/biotools/biotools/samtools/1.0"
+TABIX="/biotools/biotools/tabix/0.2.5"
+CAP3="NA"
+CUTADAPT="NA"
+#### TODO: Note from MTK: not installed yet
+GVCF="NA"
+
+#### SV tools
+PATTERNCNV="/dlmp/sandbox/scripts/PatternCNV/1.1"
+SOFTSEARCH="NA"
+CREST="NA"
+DELLY="NA"
+
+
+### libraries
+PYTHONLIB="/biotools/biotools/python/2.7.3/lib/:/biotools/biotools/python/2.7.3/lib/python2.7/site-packages/"
+PERLLIB="/biotools/biotools/perl/5.16.2/lib/5.16.2:/usr/share/perl5:/usr/local/biotools/perl/5.16.2/lib/site_perl/5.16.2/x86_64-linux/"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/biotools/python/2.7.3/lib/
+
+### customized paramters
+#### TODO: Note from MTK: Need to determine the correct servers for the pieces
+#below
+HSR_SERVER="cgslweb:8081/sandbox/runs/"
+FTP_SERVER="http://cgslweb:8081/sandbox/runs/"
+BioRWeb_SERVER="http://biorweb.mayo.edu/"
+PORTAL_SERVER="http://rcftomprod1"
+##version of IGV
+IGV="2.1.30"
+THREADS="4"
+DATATHREADS="1"
+PLATFORM="illumina"
+CENTER="mayo"
+
+### queue paramters
+QUEUE=sandbox.q
+NOTIFICATION_OPTION="ae"
+SGE_STACK="10M"
+
+###########
+############################################
+## flags
+##################
+#### workflow execution is divided into per chromosome if YES
+DO_ANALYSIS_PER_CHROMOSOME="YES"
+#### NO for internal mayo BAMs and YES for external BAMs
+REORDERSAM="NO"
+#### YES to appy VQSR on germlime variants
+GERMLINE_VARIANT_APPLY_VQSR="YES"
+#### YES, if somatic calling is required
+SOMATIC_CALLING="NO"
+#### YES if recalibration is needed on BAM file
+RECALIBRATION="YES"
+#### YES if realignment is needed on BAM file
+REALIGNMENT="YES"
+#### YES to appy VQSR on somatic variants
+SOMATIC_VARIANT_APPLY_VQSR="NO"
+###YES if exome samples, else NO
+TARGETTED="YES"
+### for multi sample calling, YES if want to realign multi sample
+MULTISAMPLE_REALIGN_RECAL="YES"
+###picard remove duplicate reads
+## YES/NO to run picard Duplicate removal code
+MARKDUP="YES"
+### YES/NO to keep reads after duplicate removal code
+REMOVE_DUP="NO"
+###YES, if aligned BAM should be removed
+REMOVE_ALIGNED_BAM="NO"
+### YES, if variant calling is not required
+STOP_AFTER_REALIGNMENT="NO"
+#Use high-speed bam file sorting and indexing when possible
+USENOVOSORT="YES"
+novosort_mem_params="--ram 12G --tmpcompression 0"
+### RUN GVCF module
+GVCF_MODULE="NO"
+### RUN SV module
+SV_MODULE="YES"
+###
+DASHBOARD="NO"
+###
+RUN_QC="NO"
+###########
+############################################
+#tool Parameters
+
+SOMATIC_SNIPER_params="-q 20 -Q 20 -F vcf"
+MUTECT_params=""
+JSM_Filter="-prob 0.1"
+JOINTSNVMIX_params="--model snvmix2"
+NOVO_params="-x 5 -i PE 425,80 -r Random --hdrhd off -v 120"
+#BWA_MEM_params="-M"
+PICARD_ReadGroup_params="PL=illumina CN=mayo LB=hg19 CREATE_INDEX=true"
+### we are assuming that you are using 4 threads, 3G per thread
+NOVOSORTOPT="--ram 12G --tmpcompression 0"
+CUTADAPT_params="-O 5 -f fastq"
+SamToFastq_params="INCLUDE_NON_PF_READS=True VALIDATION_STRINGENCY=SILENT"
+CollectInsertSizeMetrics_params="VALIDATION_STRINGENCY=SILENT"
+MarkDuplicates_params="COMPRESSION_LEVEL=0 MAX_FILE_HANDLES=100 CO=MarkDuplicates PG=null VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true"
+
+#### sv tools
+CREST_params=""
+SOFTSEARCH_params="-l 5 -r 2 -m 0 -s 4"
+DELLY_params=""
+PATTERNCNV_params=""
+#### GATK tools
+## VQSR
+VQSR_params_SNV="-an QD -an MQRankSum -an ReadPosRankSum -an FS -an DP"
+VQSR_params_INDEL="-an DP -an FS -an ReadPosRankSum -an MQRankSum --maxGaussians 4"
+
+##realignment
+IndelRealigner_params="--maxReadsForRealignment 20000 --maxReadsInMemory 150000 -compress 0"
+RealignerTargetCreator_params=""
+
+## recalibration
+BaseRecalibrator_params=""
+PrintReads_params="--bam_compression 0"
+
+### callers and vcf
+UnifiedGenotyper_params="--num_bam_file_handles 100"
+HaplotypeCaller_params="-stand_call_conf 30 -stand_emit_conf 10"
+## if gVCF mode which is single sample mode
+GenotypeGVCFs_params=""
+SomaticIndelDetector_params="--window_size 1000"
+VariantAnnotator_params="-A QualByDepth -A MappingQualityRankSumTest -A HomopolymerRun -A ReadPosRankSumTest -A HaplotypeScore -A Coverage -A MappingQualityZero -A DepthPerAlleleBySample -A RMSMappingQuality -A FisherStrand -A ChromosomeCounts"
+ValidateVariants_params=""
+CombineVariants_params="-dt NONE"
+PhaseByTransmission_JVM_params="-fatherAlleleFirst"
+## coverage
+BaseCoverageDistribution_params="-fd -dt NONE"
+
+##blat
+BLAT_params="-w 50 -m 70 -t 90"
+BLAT_PORT="50000"
+BLAT_SERVER="localhost"
+
+### parameters
+STRUCT_MIN_SUPPORT="10"
+STRUCT_MIN_IDENTITY="0.9"
+MIN_MAPPING_QUAL="20"
+BIN_SIZE="10"
+MAX_READS_MEM_SORT="2000000"
+JOB_LIMIT="2700"
+ULIMIT="3000"
+
+### WORKFLOW PATH ###
+#### TODO: Note from MTK: As far as I'm aware, the commented tools are not
+# currently used for a clinical environment.
+ORACLE_TRC_DELIVERY="NA"
+COMMON_SCRIPT_PATH="NA"
+VCF_MINER_PATH="/dlmp/sandbox/scripts/ngs_core/vcf-miner-cli/VCF-Miner.upload.sh"
+VCF_MINER="http://ngsqvm01.mayo.edu"
+RLIB="/usr/local/biotools/r/3.1.1"
+
+DELIVERY_GENERATOR_PATH="/dlmp/sandbox/scripts/ngs_core/maindocument/"
+QC_WORKFLOW="NA"
+GVCF_WORKFLOW_PATH="NA"
+SV_WORKFLOW_PATH="NA"
+BIOR_ANNOTATE_WORKFLOW_PATH="/dlmp/sandbox/ggps_updates_20151022/bior_annotate/v2.5"
+
+
+QC_PATH="NA"
