@@ -1,8 +1,10 @@
-########################
-##### annotation
-#######################
-annotate_mem="6G"
-annotate_ba_mem="14G"
-annotate_ba_merge="1G"
+#### SCRIPTS MEMORY ARGUMENTS
+## annotation
+annotate_mem="5G"
+annotate_ba_mem="12G"
+annotate_ba_merge="4G"
 bior_annotate_mem="1G"
+
+## SGE
+SGE_STACK="10M"
 

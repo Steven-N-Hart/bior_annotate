@@ -30,20 +30,20 @@ cat << EOF
 ##      -j    job name for qsub command
 ##      -l    set logging
 ##      -L    Do not add links to VCF [default is set to TRUE]
-##      -M    memory info file
+##      -M    memory info file from GGPS
 ##      -n    Number of lines to split the data into  [default:20000]
 ##      -O    output directory [cwd]
-##      -q    Flag to turn on SNPEFF
+##      -s    Flag to turn on SNPEFF
 ##      -a    Flag to turn off CAVA annotation
 ##      -Q    queue override (e.g. 1-day) [defaults to what is in the tool_info]
 ##      -t    Export table as well as VCF [1]
 ##				Version 1: Seperate columns for Depth, GQ, AD, and GT per sample
 ##				Version 2: First N columns like VCF, one colulmn containing sample names
-##      -T    tool info file 
+##      -T    tool info file from GGPS
 ##      -x    path to temp directory [default: cwd]
 ##
 ##
-##	Clinical specific options 
+##	Clinical specific options (DLMP use only)
 ##      -P    PEDIGREE file (for trios only, this will add extra annotations)
 ##      -g    GENE list (only used with pedigrees)
 
@@ -77,16 +77,19 @@ EOF
 }
 
 ### Defaults ###
-BIOR_ANNOTATE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 runCAVA="-c"
 table=0
-catalogs="${BIOR_ANNOTATE_DIR}/config/catalog_file"
-drills="${BIOR_ANNOTATE_DIR}/config/drill_file"
 outdir=$PWD
 START_DIR=$PWD
 TEMPDIR=$PWD
 NUM=20000
 log="FALSE"
+BIOR_ANNOTATE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+catalogs=${BIOR_ANNOTATE_DIR}/config/catalog_file
+drills=${BIOR_ANNOTATE_DIR}/config/drill_file
+tool_info="${BIOR_ANNOTATE_DIR}/config/tool_info.txt"
+memory_info="${BIOR_ANNOTATE_DIR}/config/memory_info.txt"
+
 
 ##################################################################################
 ###
@@ -95,7 +98,7 @@ log="FALSE"
 ##################################################################################
 echo "Options specified: $@"
 
-while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:qQ:st:T:v:x:" OPTION; do
+while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
   case $OPTION in
   	a)  runCAVA="" ;;
     c)  catalogs=$OPTARG ;;     #
@@ -114,8 +117,7 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:qQ:st:T:v:x:" OPTION; do
     o)  outname=$OPTARG ;;   #
     O)  outdir=$OPTARG ;;    #
     P)  PEDIGREE=$OPTARG ;;     #
-    q)  runsnpEff="-s" ;;         #
-    s)  runsavant="-o" ;;       #
+    s)  runsnpEff="-s" ;;         #
     Q)  QUEUEOVERRIDE=$OPTARG ;; #
     t)  table=$OPTARG ;;           #
     T)  tool_info=$OPTARG ;;     #
@@ -162,14 +164,26 @@ fi
 
 if [ -z "$tool_info" ]
 then
-    echo "Informational message: You did not supply a tool_info file."
-    tool_info=${BIOR_ANNOTATE_DIR}/config/tool_info.txt
+    if [ "$QUEUEOVERRIDE" == "NA" ]
+    then
+      echo "Informational message: You did not supply a tool_info file."
+    	echo "Using $tool_info" 
+	else
+      echo "ERROR: A tool_info file is required when submitting to the grid."
+      exit 100
+    fi
 fi
 
 if [ -z "$memory_info" ]
 then
-    echo "Informational message: You did not supply a memory_info file."
-		memory_info=${BIOR_ANNOTATE_DIR}/config/memory_info.txt
+    if [ "$QUEUEOVERRIDE" == "NA" ]
+    then
+      echo "Informational message: You did not supply a memory_info file."
+	echo "Using $memory_info"		
+    else
+      echo "ERROR: A tool_info file is required when submitting to the grid."
+      exit 100
+    fi
 fi
 
 # Make sure this is a path to a real file, not just a symlink.
@@ -195,19 +209,20 @@ Using the following configuration files for this run:
   Memory info:  $memory_info
 
 EOF
-#exec 3>&2
-#exec 2> /dev/null
+exec 3>&2
+exec 2> /dev/null
+
 source ${tool_info}
 source ${memory_info}
 
 # This variable should be defined in the tool_info file.
-if [ -z "${WORKFLOW_PATH}" ]
+if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
-  echo "ERROR: WORKFLOW_PATH is not defined in ${tool_info}"
+  echo "ERROR: BIOR_ANNOTATE_DIR is not defined"
   exit 100
 fi
 
-source ${WORKFLOW_PATH}/shared_functions.sh
+source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
 
 
 ##Override QUEUE if set
@@ -226,17 +241,12 @@ export PYTHONPATH=${PERLLIB}
 export PERL5LIB=${PERL5LIB}
 export SCRIPT_DIR=${BIOR_ANNOTATE_DIR}/scripts
 
+
 INFO_PARSE=${SCRIPT_DIR}/Info_extract2.pl
 VCF_SPLIT=${SCRIPT_DIR}/VCF_split.pl
 check_variable "$TOOL_INFO:BIOR_PROFILE" $BIOR_PROFILE
 source $BIOR_PROFILE
 check_variable "$TOOL_INFO:PERL" $PERL
-if [ "$runsavant" == "TRUE" ]
-then
-	check_variable "$TOOL_INFO:SAVANT" $SAVANT
-	check_variable "$TOOL_INFO:SAVANT_CONFIG" $SAVANT_CONFIG
-	check_variable "$TOOL_INFO:PYTHON" $PYTHON
-fi
 
 check_variable "$TOOL_INFO:BEDTOOLS" $BEDTOOLS
 
@@ -330,16 +340,16 @@ do
 
 	if [[ -z "$KEY" || -z "$TERMS" ]]
 	then
-    $WORKFLOW_PATH/email.sh -f $drills -m annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
+    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $drills -m annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
     exit 100
 	fi
 
-	CATALOG=`grep -w $KEY $catalogs |cut -f3|head -1`
-	COMMAND=`grep -w $KEY $catalogs |cut -f2|head -1`
+	CATALOG=`grep -w ^$KEY $catalogs |cut -f3|head -1`
+	COMMAND=`grep -w ^$KEY $catalogs |cut -f2|head -1`
 
 	if [[ -z "$CATALOG" || -z "$COMMAND" ]]
 	then
-    $WORKFLOW_PATH/email.sh -f $catalogs -m annotate.sh -M "Unable to retrieve catalog name or command" -p $catalogs -l $LINENO
+    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $catalogs -m annotate.sh -M "Unable to retrieve one of the catalog $CATALOG or command $COMMAND for key $KEY" -p $catalogs -l $LINENO
     exit 100
 	fi
 
@@ -401,8 +411,6 @@ NUM_CATALOGS_TO_DRILL=`awk 'END{print NR }' $drills`
 # Create script to annotate the VCF
 cat << EOF >> annotate.sh
 #!/usr/bin/env bash
-#exec 3>&2
-#exec 2> /dev/null
 source $BIOR_PROFILE
 source $tool_info
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
@@ -446,11 +454,11 @@ do
 
   cat \$VCF | bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval bior_drill \${drill_opts} | bior_tjson_to_vcf > \$CWD_VCF.\$count
 
-  START_NUM=\`cat \$VCF | grep -v '#' | wc -l\`
-  END_NUM=\`cat \$CWD_VCF.\$count | grep -v '#' | wc -l\`
+  START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
+  END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`
   if [[ ! -s \$CWD_VCF.\${count} || ! \$END_NUM -ge \$START_NUM ]]
   then
-    $WORKFLOW_PATH/email.sh -f \$CWD_VCF.\${count} -m annotate.sh -M "bior annotation failed using \$CATALOG_FILE" -p \$VCF -l \$LINENO
+    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f \$CWD_VCF.\${count} -m annotate.sh -M "bior annotation failed using \$CATALOG_FILE" -p \$VCF -l \$LINENO
     exit 100
   fi
 
@@ -481,10 +489,10 @@ CWD_VCF=`basename $VCF`
 #Remove IDs from VCFs b/c bior uses them incorrectly
 if [[ "$CWD_VCF" == *gz ]] ;
 then
-	zcat $VCF|$PERL $VCF_SPLIT|$PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' >${CWD_VCF/.gz/}
+	zcat $VCF|$PERL $VCF_SPLIT| grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' >${CWD_VCF/.gz/}
 	CWD_VCF=${CWD_VCF/.gz/}
 else
-	cat $VCF|$PERL $VCF_SPLIT |$PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
+	cat $VCF|$PERL $VCF_SPLIT | grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
 fi
 
 echo `ls $TEMPDIR/$CWD_VCF`
@@ -501,7 +509,7 @@ then
 fi
 
 #SPLIT the VCF files into maneageable chunks
-cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "#" >  ${CWD_VCF}.header 
+cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "^#" >  ${CWD_VCF}.header
 if [ ! -s "${CWD_VCF}.header" ]
 then
   echo "ERROR: failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
@@ -510,7 +518,7 @@ fi
 
 set -x
 
-cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|grep -v "#"|split -d -l $NUM -a 3 - ${CWD_VCF/.gz/}
+cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|grep -v "^#"|split -d -l $NUM -a 3 - ${CWD_VCF/.gz/}
 
 FIND_RESULTS=`find $TEMPDIR -maxdepth 1 -name "${CWD_VCF}[0-9]*" -print -quit`
 
@@ -530,27 +538,29 @@ done
 ###
 ###     Fire off the qsubs for each split VCF file
 ###
-##################################################################################
-args="$SGE -cwd -q $QUEUE -m $NOTIFICATION_OPTION -notify -M $EMAIL -l h_stack=$SGE_STACK"
+#################################################################################
+args="$SGE_BASE/qsub -cwd -q $QUEUE -m ae -notify -M $EMAIL -l h_stack=$SGE_STACK"
 #Option to run off SGE
-#exec 2>&3
 if [ "$QUEUE" == "NA" ]
 then
 	for x in ${CWD_VCF}[0-9][0-9][0-9]
 	do
-	sh annotate.sh $x
-	echo $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runsavant} ${runCAVA} ${PEDIGREE} ${GENE_LIST}
-	sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runsavant} ${runCAVA} ${PEDIGREE} ${GENE_LIST} 
+		sh annotate.sh $x
+		echo $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
+		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
  echo $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}
  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} 
  cd $START_DIR
- if [[ "$DEBUG_MODE" == "NO" ]]
+ if [[ "$log" != "TRUE"  ]]
  then
    rm -r ./.bior.${CREATE_DIR}
  fi
  exit 0
 fi
+
+# If you are at this point, then you will be submitting jobs to the sun grid engine
+#command -v $SGE_BASE/qsub >/dev/null 2>&1 || { echo >&2 "I require qsub but it's not installed.  Aborting.";exit 1}
 
 for x in ${CWD_VCF}[0-9][0-9][0-9]
 do
@@ -569,20 +579,20 @@ do
 	 
 	if [ "$log" == "TRUE" ]
 	then
-        echo "$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh $BA_PROGRAM_ARGS|cut -f3 -d ' ' >>jobs"
+        echo "$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh $bior_annotate_params|cut -f3 -d ' ' >>jobs"
 	fi
 	if [ "$job_name" ]
 	then
 		if [ "$job_suffix" ]
 		then
-			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram.$job_suffix $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runsavant} ${runCAVA} ${PEDIGREE} ${GENE_LIST}"
+			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram.$job_suffix $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
 			hold="-hold_jid $job_name.baProgram.$job_suffix"
 		else
-			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runsavant} ${runCAVA} ${PEDIGREE} ${GENE_LIST}"
+			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
 			hold="-hold_jid $job_name.baProgram"
 		fi
 	else
-		command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runsavant} ${runCAVA} ${PEDIGREE} ${GENE_LIST}"
+		command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
 		hold="-hold_jid baProgram"
 	fi	
 	eval "$command"
@@ -591,7 +601,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	echo "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o $outdir/${outname} -T $tool_info -r $drills -s $runsnpEff -v $runsavant -D $SCRIPT_DIR"
+	echo "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o $outdir/${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
 		LOG="-l"
 fi
 
@@ -599,12 +609,12 @@ if [ "$job_name" ]
 then
 	if [ "$job_suffix" ]
 	then
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	else
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	fi
 else
-	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+	command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 fi	
 eval "$command" 
 echo "You will be notified by e-mail when your jobs complete"

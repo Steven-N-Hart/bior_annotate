@@ -3,16 +3,22 @@
 # Split the multi-allelic sites in a VCF onto multiple rows, one alt allele per row
 # Jared Evans evans.jared@mayo.edu
 # 10/2014
+# David Rider
+# 07/2016
+# Add the option to supply your own INFO keys on the command line to use for splitting 
 
 use strict;
 #use warnings;
 use Data::Dumper;
 use Getopt::Long;
 
+my @DEFAULT_INFO_KEYS_TO_SPLIT = qw(AC AF TAC EA_AC AA_AC AC_AFR AC_AMR AC_Adj AC_EAS AC_FIN AC_Hemi AC_Het AC_Hom AC_NFE AC_OTH AC_SAS AN AN_AFR AN_AMR AN_Adj AN_EAS AN_FIN AN_NFE AN_OTH AN_SAS GQ_MEAN Het_AFR Het_AMR Het_EAS Het_FIN Het_NFE Het_OTH Het_SAS Hom_AFR Hom_AMR Hom_EAS Hom_FIN Hom_NFE Hom_OTH Hom_SAS MLEAC Hemi_AFR Hemi_AMR Hemi_EAS Hemi_FIN Hemi_NFE Hemi_OTH Hemi_SAS);
+
 # script options
-my($input, $output, $help);
+my($input, $output, $info_keys_to_split_delimited, $help);
 GetOptions("in|i:s"     => \$input,
         "out|o:s"       => \$output,
+        "keys|k:s"       => \$info_keys_to_split_delimited,
         "help|h|?"     => \&help);
 
 # read from input file if defined
@@ -27,6 +33,13 @@ if (defined $output) {
 	open $fh, '>', $output;
 	select $fh;
 }
+
+my @info_keys_to_split = @DEFAULT_INFO_KEYS_TO_SPLIT;
+if (defined $info_keys_to_split_delimited) {
+	@info_keys_to_split = split(/,/, $info_keys_to_split_delimited);
+}
+# David Rider - create this to actually check if a key is in the list of keys for splitting - see below
+my %info_keys_to_split_map = map { $_ => 1 } @info_keys_to_split;
 
 my $sample_count = 0;
 
@@ -67,7 +80,8 @@ while(<>){
 		for(my $j = 0; $j < scalar(@info_keys); $j++){
 			if(exists $info_values{$info_keys[$j]}){
 				# these have comma seperated values for each alt allele
-				if($info_keys[$j] eq "AC" or $info_keys[$j] eq "AF" or $info_keys[$j] or $info_keys[$j] eq "TAC" or $info_keys[$j] eq "EA_AC" or $info_keys[$j] eq "AA_AC"  or $info_keys[$j] eq "AC_AFR" or $info_keys[$j] eq "AC_AMR" or $info_keys[$j] eq "AC_Adj" or $info_keys[$j] eq "AC_EAS" or $info_keys[$j] eq "AC_FIN" or $info_keys[$j] eq "AC_Hemi" or $info_keys[$j] eq "AC_Het" or $info_keys[$j] eq "AC_Hom" or $info_keys[$j] eq "AC_NFE" or $info_keys[$j] eq "AC_OTH" or $info_keys[$j] eq "AC_SAS" or $info_keys[$j] eq "AN" or $info_keys[$j] eq "AN_AFR" or $info_keys[$j] eq "AN_AMR" or $info_keys[$j] eq "AN_Adj" or $info_keys[$j] eq "AN_EAS" or $info_keys[$j] eq "AN_FIN" or $info_keys[$j] eq "AN_NFE" or $info_keys[$j] eq "AN_OTH" or $info_keys[$j] eq "AN_SAS" or $info_keys[$j] eq "GQ_MEAN" or $info_keys[$j] eq "Het_AFR" or $info_keys[$j] eq "Het_AMR" or $info_keys[$j] eq "Het_EAS" or $info_keys[$j] eq "Het_FIN" or $info_keys[$j] eq "Het_NFE" or $info_keys[$j] eq "Het_OTH" or $info_keys[$j] eq "Het_SAS" or $info_keys[$j] eq "Hom_AFR" or $info_keys[$j] eq "Hom_AMR" or $info_keys[$j] eq "Hom_EAS" or $info_keys[$j] eq "Hom_FIN" or $info_keys[$j] eq "Hom_NFE" or $info_keys[$j] eq "Hom_OTH" or $info_keys[$j] eq "Hom_SAS" or $info_keys[$j] eq "MLEAC"){
+                                # check this key against the list of INFO keys to split
+				if(exists($info_keys_to_split_map{$info_keys[$j]})){
 					my @alt_info_values = split(",",$info_values{$info_keys[$j]});
 					if(scalar(@alt_info_values) > 1){
 						print $info_keys[$j]."=".$alt_info_values[$split_rownum];
@@ -166,7 +180,9 @@ while(<>){
 	
 sub help{
 
-        print '
+        my $default_info_key_str = join(',', @DEFAULT_INFO_KEYS_TO_SPLIT);
+
+        print "
 DESCRIPTION:
         split_multi_vcf.pl will split triallelic and greater sites onto multiple lines ensuring 
         that each row only has one Alt allele. The script will also fix the necessary INFO and 
@@ -183,8 +199,12 @@ OPTIONS:
         --out,-o        Optional path to output VCF file. If this option is omitted then the 
                         script will print to STDOUT.
 
+        --keys,-k       Supply the list of comma-delimited keys to split in the INFO field. 
+                        By default, the list of keys come from the ExAC VCF and are 
+                        $default_info_key_str
+
         --help,-h,-?    Display this help documentation.
 
-';
+";
 exit;
 }

@@ -99,27 +99,19 @@ function check_config()	{
 	mv $2.tmp $2														
 }	
 
-#prior_jobs_successful
-#
-#ret_val=$?
-#
-#if [[ $ret_val != 0 ]]
-#then
-#  echo "prior_jobs_successful returned $ret_val"
-#  exit 100
-#else
-#  echo "All previous jobs exited successfully."
-#fi
-
-function exitcmd() {
-  err=$?
-  if (($err > 0)); then
-    echo "original exit status $err"
-    $WORKFLOW_PATH/email.sh -f "Insufficient memory" -m annotate.sh -M "Killed due to running out of memory" -p $drills -l $LINENO
-    # Wait should wait for the email script to complete (along with any other child processes).
-    sleep 30
-    exit 100
-  fi
+function check_capturekit()	{
+	chrs=$1
+	capturekit=$2
+	for i in `echo $chrs | tr ":" " "`
+	do
+		if [ `cat $capturekit | grep -w chr$i | wc -l` -le 0  ]
+		then
+			echo -e "\n************************************"
+			echo -e "no chromosomal region in the capture bed file, \nplease remove the chromosome : chr$i from CHRINDEX tag from runinfo file"
+			echo -e "\n************************************"
+			exit 1;
+		fi
+	done	
 }
 
 function check_dir_exist()	{

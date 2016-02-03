@@ -363,7 +363,7 @@ sub CheckGene(){
 			#print "PAIRS=@pairs[0] and @pairs[1]\n";
 #			if (!$pairs[1]){return 0};#ignore any incorrect labels
 			if (!$pairs[1]){next;};#ignore any incorrect labels
-			if($pairs[0]=~/SAVANT_GENE/){$geneSymbol=$pairs[1];};
+			if($pairs[0]=~/CAVA_GENE/){$geneSymbol=$pairs[1];};
 		}
 	}
 #	print "GENE SYMBOL=$geneSymbol\n";

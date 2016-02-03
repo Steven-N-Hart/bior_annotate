@@ -53,7 +53,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 			if ($firstSymbol =~ /^0$/)
 				{
 				print $_."\n";
-				print STDERR "FirstSymbol=0 so moving on\n" if ($verbose);
+				print STDERR "FirstSymbol=0 or no match on the impact so moving on\n" if ($verbose);
 				next;
 			};
 			$GT=&calcGT($_);
@@ -247,10 +247,12 @@ sub getGeneSymbol(){
 			@pairs=split(/=/,$tag);
 		#	print "Looking at @pairs\n" if ($verbose);
 			#if (!$pairs[1]) {return 0};#ignore any incorrect labels
-			if($pairs[0]=~/snpeff.Gene_name|SAVANT_GENE/){$geneSymbol=$pairs[1];
+			#Remove SNPEFF
+			#if($pairs[0]=~/snpeff.Gene_name|SAVANT_GENE|CAVA_GENE/){$geneSymbol=$pairs[1];
+			if($pairs[0]=~/CAVA_GENE/){$geneSymbol=$pairs[1];
 				print "GENE SYMBOL recognized as $pairs[1]\n" if ($verbose)};
 			#Now count if MODERATE or HIGH
-			if($pairs[0]=~/snpeff.Effect|SAVANT_EFFECT/){$effect=$pairs[1]};
+			if($pairs[0]=~/CAVA_EFFECT/){$effect=$pairs[1]};
 		}
 	}
 	return $geneSymbol;
@@ -268,9 +270,9 @@ sub getGeneEffect(){
 		if($tag=~/=/){
 			@pairs=split(/=/,$tag);#next if (!$pairs[1]);#ignore any incorrect labels
 			#print "PAIRS=@pairs\n";
-			if($pairs[0]=~/snpeff.Effect|SAVANT_EFFECT|CAVA_EFFECT/){
+			if($pairs[0]=~/CAVA_EFFECT/){
 				$effect=$pairs[1];
-				#print "\n\neffect=$pairs[1];\n" if ($verbose);
+				print "\n\neffect=$pairs[1];\n" if ($verbose);
 				};	
 		}
 	}
@@ -334,7 +336,9 @@ sub FreqCheck(){
 		#split on = to match true value
 		if($tag=~/=/){
 			@pairs=split(/=/,$tag);
-			if($pairs[0]=~/ALL_maf|ExAC.Info.AF/){$maf=$pairs[1]};
+			if($pairs[0]=~/ALL_maf|ExAC.Info.AF|ExAC_r03_GRCh37_nodups.INFO.AF/){$maf=$pairs[1];
+			print "my MAF = $maf\n\n" if ($verbose);
+			};
 		}
 	}
 	
@@ -343,7 +347,9 @@ sub FreqCheck(){
 		print STDERR "The variant is too frequent\n" if ($verbose);
 		print STDERR "THE MAF=$maf and the maxFreq is set to $maxFreq\n" if ($verbose);
 		return 0}
-	else{return 1}
+	else{
+		return 1
+		}
 	;
 }
 ######################################################################################

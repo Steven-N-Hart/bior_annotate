@@ -10,6 +10,7 @@ perl SNPEFF_parse.pl test.vcf > results.out
 while (<VCF>) {
     #Some versions of SNPEFF have trailing whitespaces.
     $_=~s/ $//;
+	$tx="";
     #skip headers
     if ($_=~/^##/){
 		if ($_=~/##INFO=<ID=EFF/) {
@@ -33,21 +34,22 @@ while (<VCF>) {
 			}
 			next;
 		}
-                if ($_=~/##INFO=<ID=ANN/) {
-                        $_=~s/ \"/\"/g;
-                        $_=~s/\" /\"/g;
-                        print;
-                        chomp;
-                        $_=~s/ |\'|\"|>//g;
+        if ($_=~/##INFO=<ID=ANN/) {
+			$_=~s/ \"/\"/g;
+            $_=~s/\" /\"/g;
+			#$_=~s/\//-/g;
+            print;
+            chomp;
+            $_=~s/ |\'|\"|>//g;
 			@VALUES=split(/\|/,$_);
-                        #print out proper headers for them
-                        for ($j=1;$j<@VALUES;$j++){
-                                $string="##INFO=<ID=snpeff.$VALUES[$j],Number=1,Type=String,Description=\"Annotation from SNPEFF\">\n";
-                                print $string;
-                        }
-                        next;
-                }
-
+            #print out proper headers for them
+            for ($j=1;$j<@VALUES;$j++){
+				$string="##INFO=<ID=snpeff.$VALUES[$j],Number=1,Type=String,Description=\"Annotation from SNPEFF\">\n";
+				#if($VALUES[$j] == "Feature_Type"){$tx=$j}             
+				print $string;
+            }
+            next;
+        }		
 		else{
 			$_=~s/ \"/\"/g;
 			$_=~s/\" /\"/g;
@@ -68,75 +70,49 @@ while (<VCF>) {
 		my $len=scalar(@ROW)-1;
 		#print "ROW==@ROW\n\nLENGTH=$len\n\n";die;
         my @INFO=split(/;/,$ROW[7]);
+		#Use this for the snpeff corrected
 		my $new_INFO="";
+		#use this to store everything else
+		my $old_INFO="";
 		my $try="";
+		@EFF=();
         for (my $i=0;$i<@INFO;$i++){
 			my $tag=$INFO[$i];$tag=~s/;;/;/g;
-			#If INFO doesn't match EFF, then add to new
-			if($tag=~/ANN=/){
+			#If INFO doesn't match EFF, then add to new		
+			if($tag=~/ANN=|EFF=/){
+				$tag=~s/\(/\|/g;
+				$tag=~s/\)//g;
 				@alternateResults=split(/,/,$tag);
-				#Sort in order of importance to the last even it HIGH or MODERATE
-				@alternateResults=&sortSNPEFF(@alternateResults);
+				#print join("\n",@alternateResults)."\n";
 				for ($j=0;$j<@alternateResults;$j++){
+					#SNPEff ANN annotates sequence features other than transcripts, so make sue to only output transcripts
+					# Otherwise, you have a lot of duplication
+					#next if (( $tag=~/^ANN/) & ($alternateResults[$j] !~/transcript/));
 					@entries=split(/\|/,$alternateResults[$j]);
 					for (my $i=1;$i<@entries;$i++){
-        	                                #next if (!$entries[$i]);
-                	                        $new_INFO.="snpeff.".$VALUES[$i]."=".$entries[$i].";";
-                        	        }
-
-				}
+						#Only push it if it has a value
+						if($entries[$i]){
+							$new_INFO.="snpeff.".$VALUES[$i]."=".$entries[$i].";";
+						}
+                    }
+					push(@EFF,$new_INFO);
+				 }
 			}
-			elsif ($tag=~/EFF=/){
-				 my $line="";
-				 $try=$new_INFO;
-				 $tag=~s/\(/\|/g;
-				 $tag=~s/\)//g;
-				 @alternateResults=split(/,/,$tag);
-				 @alternateResults=&sortSNPEFF(@alternateResults);
-				 for ($j=0;$j<@alternateResults;$j++){
-					 @entries=split(/\|/,$alternateResults[$j]);
-					 for (my $i=0;$i<@entries;$i++){
-						next if ((!$entries[$i])||(!$VALUES[$i]));
-						 $VALUES[$i]=~s/EFF=//;
-						 $entries[$i]=~s/EFF=//;
-						 #print "$VALUES[$i]=$entries[$i]\n";
-					 $new_INFO.="snpeff.".$VALUES[$i]."=".$entries[$i].";";
-					 }
-				}
-			 }
 			else{
-				$new_INFO.=$tag.";";
+				#print "TAG=$tag\n";
+				if($tag=~/^LOF=/){$tag="LOF=true"}
+				if($tag=~/^NMD=/){$tag="NMD=true"}
+				$old_INFO.=$tag.";";
 			}
 		}
-       $line=join ("\t",@ROW[0..6],$new_INFO,@ROW[8..$len])."\n";
+	#print "new_INFO=$new_INFO\nold_info=$old_INFO\n";
+	for ($i=0;$i<@EFF;$i++){
+		$var=join(";",$old_INFO,$EFF[$i]);
+		$line=join ("\t",@ROW[0..6],$var,@ROW[8..$len])."\n";
 		#$line=~s/\t\n/\n/;
+		$line=~s/;;/;/g;
 		print $line;
 		}
+	}
 }
 close VCF;
-
-
-sub sortSNPEFF {
-	@newArray = ();
-	#Put moderate effects as last
-	for ($i=0;$i<@_;$i++){
-		if ($_[$i]=~/MODERATE/){
-			push @newArray, $_[$i];
-		}
-		else{
-			unshift @newArray, $_[$i];
-		}
-	}
-	#Now make sure that HIGH is after MODERATE
-	        for ($i=0;$i<@_;$i++){
-                if ($_[$i]=~/HIGH/){
-                        push @newArray, $_[$i];
-                }
-                else{
-                        unshift @newArray, $_[$i];
-                }
-        }
-my %seen;
-my @unique = grep { !$seen{$_}++ } @newArray;
-return @unique;
-}

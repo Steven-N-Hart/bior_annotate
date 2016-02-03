@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ##################################################################################
 ###
 ###     Parse Argument variables
@@ -6,14 +6,13 @@
 ##################################################################################
 ##fix
 echo "Options specified: $@"| tr "-" "\n"
-while getopts "D:g:p:M:v:sT:od:t:l:j:hLc" OPTION; do
+while getopts "D:g:p:M:v:sT:d:t:l:j:hLc" OPTION; do
   case $OPTION in
     h) echo "Read the instructions"
         exit ;;
     v) CWD_VCF=$OPTARG ;;
     s) runsnpeff="TRUE" ;;
     T) tool_info=$OPTARG ;;
-    o) runsavant="TRUE" ;;
 	c) runCAVA="TRUE" ;;
     d) drills=$OPTARG ;;
     t) table=$OPTARG ;;
@@ -42,11 +41,11 @@ then
 fi
 source "$tool_info"
 source "$MEM_INFO"
-source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
+source ${DIR}/shared_functions.sh
 
 if [[ -z "$CWD_VCF" || ! -e "$CWD_VCF" || ! -s "$CWD_VCF" ]]
 then
-   ${BIOR_ANNOTATE_DIR}/email.sh -f \$CWD_VCF -m ba.program.sh -M "VCF file does not exist" -p \$VCF -l \$LINENO
+   ${DIR}/email.sh -f \$CWD_VCF -m ba.program.sh -M "VCF file does not exist" -p \$VCF -l \$LINENO
    exit 100
 fi
 
@@ -69,14 +68,14 @@ if [ "$log" == "TRUE" ]
 then
 	set -x
 fi
-START_NUM=`egrep -v "#|^$" $CWD_VCF |wc -l|cut -f1 -d" "`
+START_NUM=`egrep -v "^#|^$" $CWD_VCF |wc -l|cut -f1 -d" "`
 
 if [ "$runsnpeff" == "TRUE" ]
 then
   echo "Running SNPeff"
 	$JAVA7/java -Xmx$snpeff_mem -jar $SNPEFF/snpEff.jar $SNPEFF_params -c $SNPEFF/snpEff.config $SNPEFF_DB $CWD_VCF > $CWD_VCF.tmp
 	$PERL $SNPEFF_PARSE  $CWD_VCF.tmp > $CWD_VCF
-	END_NUM=`grep -v "#" ${CWD_VCF}|wc -l|cut -f1 -d" "`
+	END_NUM=`grep -v "^#" ${CWD_VCF}|wc -l|cut -f1 -d" "`
 	if [ ! "$END_NUM" -ge "$START_NUM" ];
 	then 
 		echo "${CWD_VCF} SnpfEFF
@@ -85,28 +84,18 @@ then
 	fi
 fi
 
-# if [ "$runsavant" == "TRUE" ]
-# then
-#   echo "Running SAVANT"
-# 	$PYTHON/python $SAVANT -c $SAVANT_CONFIG -i $CWD_VCF -o $CWD_VCF.tmp
-# 	cat $CWD_VCF.tmp.vcf |$PERL $SAVANT_PARSE - |$PERL -pne 's/\s\n/\n/' > $CWD_VCF.tmp2.vcf
-# 	mv $CWD_VCF.tmp2.vcf $CWD_VCF.tmp.vcf
-# 	END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp.vcf |wc -l|cut -f1 -d" "`
-# 	if [ ! "$END_NUM" -ge "$START_NUM" ];
-# 	then 
-# 		echo  "${CWD_VCF}.savant has insufficient number of rows. SAVANT Failed" >> ../err.log;
-#     	exit 100;
-# 	fi
-# 	mv $CWD_VCF.tmp.vcf $CWD_VCF
-# fi
-
 if [ "$runCAVA" == "TRUE" ]
 then
   echo "Running CAVA"
 	$PYTHON/python $CAVA -c $CAVA_CONFIG -i $CWD_VCF -o $CWD_VCF.tmp
+	if [ ! -f $CWD_VCF.tmp.vcf ]; then
+		echo "CAVA FAILED TO RUN with tthe following command"
+		echo "$PYTHON/python $CAVA -c $CAVA_CONFIG -i $CWD_VCF -o $CWD_VCF.tmp"
+		exit 100
+	fi
 	cat $CWD_VCF.tmp.vcf |$PERL $CAVA_PARSE - |$PERL -pne 's/\s\n/\n/' > $CWD_VCF.tmp2.vcf
 	mv $CWD_VCF.tmp2.vcf $CWD_VCF.tmp.vcf
-	END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp.vcf |wc -l|cut -f1 -d" "`
+	END_NUM=`egrep -v "^#|^$" ${CWD_VCF}.tmp.vcf |wc -l|cut -f1 -d" "`
 	if [ ! "$END_NUM" -ge "$START_NUM" ];
 	then 
 		echo  "${CWD_VCF}. CAVA has insufficient number of rows. CAVA Failed" >> ../err.log;
@@ -128,11 +117,11 @@ then
 	fi
 	if [[ $DRILLS == *ExAC* ]]; 
 	then 
+		echo "$PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE >  $CWD_VCF.tmp"
 		$PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE >  $CWD_VCF.tmp
-		END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp |wc -l|cut -f1 -d" "`
+		END_NUM=`egrep -v "^#|^$" ${CWD_VCF}.tmp |wc -l|cut -f1 -d" "`
 		if [ ! "$END_NUM" -ge "$START_NUM" ];
 		then 
-		echo "$PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE >  $CWD_VCF.tmp"
 		echo "${CWD_VCF} Inheritance script Failed" >> ../../err.log
     	exit 1
 		fi
@@ -144,7 +133,7 @@ fi
 if [ -z "$LINKOFF" ]
 then
 	$PERL $LINKS -v $CWD_VCF | $PERL $TRIM -v - -o BaseQRankSum,ClippingRankSum,DS,END,FS,HaplotypeScore,InbreedingCoeff,MLEAC,MLEAF,MQRankSum,NEGATIVE_TRAIN_SITE,POSITIVE_TRAIN_SITE,QD,ReadPosRankSum,SOR,VQSLOD,set  > $CWD_VCF.tmp
-		END_NUM=`egrep -v "#|^$" ${CWD_VCF}.tmp |wc -l|cut -f1 -d" "`
+		END_NUM=`egrep -v "^#|^$" ${CWD_VCF}.tmp |wc -l|cut -f1 -d" "`
 		if [ ! "$END_NUM" -ge "$START_NUM" ];
 		then 
 		echo "${CWD_VCF} Add Links script Failed" >> ../../err.log
@@ -159,10 +148,6 @@ if [ "$table" != 0 ]
 then
 echo "Making table file"
 echo "$DRILLS"|tr ";" "\n"|awk '($1)' > drill.table	
-	if [ "$runsavant" == "TRUE" ];
-	then 
-		echo -e "SAVANT_EFFECT\nSAVANT_IMPACT\nSAVANT_GENE\nSAVANT_HGVS\nSAVANT_CLASS\nSAVANT_ALTANN" >> drill.table
-	fi
 	if [ "$runsnpeff" == "TRUE" ]
 	then 
 		echo -e "snpeff.Gene_name\nsnpeff.Amino_acid_change\nsnpeff.Transcript\nsnpeff.Exon\nsnpeff.Effect\nsnpeff.Effect_impact\nsnpeff.Amino_acid_change\nsnpeff.Codon_change" >> drill.table
@@ -174,7 +159,7 @@ echo "$DRILLS"|tr ";" "\n"|awk '($1)' > drill.table
 	echo "Drilling into the data"
 	#cat drill.table
 	echo "#######################################################"
-	#$PERL $INFO_PARSE $CWD_VCF -q "${DRILLS}" |grep -v "##"|perl -pne 's/$editLabel//g' > $CWD_VCF.xls
+	#$PERL $INFO_PARSE $CWD_VCF -q "${DRILLS}" |grep -v "^##"|perl -pne 's/$editLabel//g' > $CWD_VCF.xls
 fi    
 #Final files $CWD_VCF & possibly $CWD_VCF.savant.xls
 

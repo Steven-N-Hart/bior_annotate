@@ -34,12 +34,13 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 			chomp;
 			@line=split("\t",$_);
 			@INFO=split(/;/,@line[7]);
-			@NEW=();$new="";@tmp=();$HGVS="";$GENE="";$ClinvarAcc="";
+			@NEW=();$new="";@tmp=();$HGVS="";$GENE="";@rsIDs=();$ClinvarSIG="";
 			for ($i=0 ; $i<scalar(@INFO);$i++){
 				#print "I=$INFO[$i]\n";
 				#rsID
-				##http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=28931606
-				if ($INFO[$i] =~ /dbSNP139.ID=/i){
+				 ##http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=28931606
+				if ($INFO[$i] =~ /dbSNP/){
+				#print "YES! there is a dbSNP!\n$INFO[$i]\n";die;
 					@tmp=split("=",$INFO[$i]);
 					@rsIDs=split(",",$tmp[1]);
 					$j=0;
@@ -54,7 +55,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 					push(@NEW,$INFO[$i],$new);
 				}
 				##http://www.genecards.org/cgi-bin/carddisp.pl?gene=KRAS
-				elsif($INFO[$i] =~ /SAVANT_GENE=|CAVA_GENE=/i){
+				elsif($INFO[$i] =~ /CAVA_GENE=/i){
 					@tmp=split("=",$INFO[$i]);
 					$tmp[1]=~s/\.//;
 					if($tmp[1]){
@@ -63,16 +64,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 					#print "My Gene=$new\n";
 					push(@NEW,$INFO[$i],$new);
 				}
-                                elsif($INFO[$i] =~ /snpeff.Gene_Name=/i){
-                                        @tmp=split("=",$INFO[$i]);
-					$tmp[1]=~s/\.//;
-                                        if(($tmp[1])&&(!$GENE)){
-					$new=qq(;Link_GeneCards=<a href="http://www.genecards.org/cgi-bin/carddisp.pl?gene=$tmp[1]" target="_blank">$tmp[1]</a>);
-                                     	$GENE=$tmp[1]};
-                                        #print "My Gene=$new\n";
-                                        push(@NEW,$INFO[$i],$new);
-                                }
-				elsif($INFO[$i] =~ /hgmd_2014.2.PubMed=/){
+				elsif(($INFO[$i] =~ /hgmd/i)&($INFO[$i] =~ /PubMed/i)){
 					@tmp=split("=",$INFO[$i]);
 					@PMID=split(",",$tmp[1]);
 					$j=0;
@@ -86,6 +78,13 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 					#print "My HGMD_pubmedID is $new\n";
 					push(@NEW,$INFO[$i],$new);
 				}
+				elsif($INFO[$i] =~ /CAVA_CSN=/){
+					@tmp=split("=",$INFO[$i]);
+					@HGVS=split(/_p/,$tmp[1]);
+					$HGVS=join("",@HGVS);
+					#print "My HGVS=$HGVS\n";
+					push(@NEW,$INFO[$i]);
+				} 				
 				elsif($INFO[$i] =~ /snpeff.Amino_Acid_Change=/){
 					@tmp=split("=",$INFO[$i]);
 					#If Savant already Set this, skip
@@ -93,19 +92,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 					#print "My HGVS=$HGVS\n";
 					push(@NEW,$INFO[$i]);
 				}                                
-				elsif($INFO[$i] =~ /SAVANT_HGVS=/){
-                                	@tmp=split("=",$INFO[$i]);
-                                        $HGVS=$tmp[1];
-                                        #print "My HGVS=$HGVS\n";
-                                        push(@NEW,$INFO[$i]);
-                                        }
-                             	elsif($INFO[$i] =~ /Clinvar.RCVaccession=/){
-					@tmp=split("=",$INFO[$i]);
-					$ClinvarAcc=$tmp[1];
-					#print "My Gene=$new\n";
-					push(@NEW,$INFO[$i]);
-				}
-				elsif($INFO[$i] =~ /Clinvar.ClinicalSignificance=/){
+				elsif($INFO[$i] =~ /.clinical_significance=/){
 					@tmp=split("=",$INFO[$i]);
 					$ClinvarSIG=$tmp[1];
 					#print "My Gene=$new\n";
@@ -118,7 +105,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 			$INFO=join(";",@NEW);
 			
 			if(($GENE)&&($HGVS)){
-				@new=split(/_(p)|\//,$HGVS);
+				@new=split(/ |\//,$HGVS);
 				$link=qq(;Link_GoogleSearch=<a href="https://www.google.com/search?q=$GENE+$new[0]+$new[1]" target="_blank">Google It!</a>);
 				$INFO=$INFO."$link";
 				}
@@ -126,52 +113,19 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 			$link=qq(<a href="http://localhost:60151/goto?locus=$line[0]:$line[1]">View</a>);
 			$INFO="$INFO;Link_IGV=$link";
 			#Translate clinvar
-			if($ClinvarAcc){
-				$INFO="$INFO;".&TranslateClinVar($ClinvarSIG,$ClinvarAcc);
-				}
-
-			
+			#print "($ClinvarSIG)&($rsIDs[0])\n";
+			if(($ClinvarSIG)&($rsIDs[0])){
+				$link=qq(<a href="http://www.ncbi.nlm.nih.gov/clinvar?term=$rsIDs[0]" target="_blank">$ClinvarSIG</a> );
+				$INFO="$INFO;".$link;
+			}
 			#print "MY New INFO=$INFO\n";
 			$newLine=join("\t",@line[0..6],$INFO,@line[8..@line]);
 			$newLine=~s/\t$//;$newLine=~s/,;/;/g;
 			$newLine=~s/;;/;/g;
 			print $newLine."\n";
 		}
-
 }
 
-sub TranslateClinVar{
-	my ($sig,$acc)=@_;
-	my @sig=split(/,|\|/,$sig);
-	@sig=uniq(@sig);
-	@choices=();
-	if ("0" ~~ @sig){push (@choices,"unknown")}
-	if ("1" ~~ @sig){push (@choices,"untested")}
-	if ("2" ~~ @sig){push (@choices,"non-pathogenic")}
-	if ("3" ~~ @sig){push (@choices,"probable-non-pathogenic")}
-	if ("4" ~~ @sig){push (@choices,"probable-pathogenic")}
-	if ("5" ~~ @sig){push (@choices,"pathogenic")}
-	if ("6" ~~ @sig){push (@choices,"drugResponse")}
-	if ("7" ~~ @sig){push (@choices,"histocompatibility")}
-	if ("255" ~~ @sig){push (@choices,"other")}
-	if ($sig =~/^[a-z]/i){push (@choices,$sig)}
-	my $res=join (",",@choices);
-	
-	my @acc=split(/,|\|/,$acc);
-	
-	@acc=uniq(@acc);
-	
-	@choices=();
-	for ($i=0;$i<@acc;$i++){
-		@tmp=split(/\./,$acc[$i]);
-		push(@choices,$tmp[0]);
-	}
-	#print "\nACC=@acc\tCHOICES=@choices\n";
-	$IDs=join("%20OR%20",@choices);
-	$link=qq(<a href="http://www.ncbi.nlm.nih.gov/clinvar?term=$IDs" target="_blank">$res</a> );
-	$link="Link_Clinvar=$link";
-	return $link;
-}
 
 sub usage{
 	print "
