@@ -72,14 +72,14 @@ START_NUM=`egrep -v "^#|^$" $CWD_VCF |wc -l|cut -f1 -d" "`
 
 if [ "$runsnpeff" == "TRUE" ]
 then
+  if [ -z "$snpeff_mem" ]; then echo "CONFIGURATION Missing <snpeff_mem> Variable" >> ../err.log; fi
   echo "Running SNPeff"
 	$JAVA7/java -Xmx$snpeff_mem -jar $SNPEFF/snpEff.jar $SNPEFF_params -c $SNPEFF/snpEff.config $SNPEFF_DB $CWD_VCF > $CWD_VCF.tmp
 	$PERL $SNPEFF_PARSE  $CWD_VCF.tmp > $CWD_VCF
 	END_NUM=`grep -v "^#" ${CWD_VCF}|wc -l|cut -f1 -d" "`
 	if [ ! "$END_NUM" -ge "$START_NUM" ];
 	then 
-		echo "${CWD_VCF} SnpfEFF
-		Failed" >> ../err.log
+		echo "${CWD_VCF} SnpfEFF Failed" >> ../err.log
     	exit 100
 	fi
 fi
