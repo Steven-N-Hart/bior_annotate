@@ -32,7 +32,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 	#;my @effects=();my @childGT=();my @VARIANTS=();my $events="";my @LINE;
 	my $counter=0;
 	while (<VCF>){
-		if ($_ =~/^##/){print;next}
+		if ($_ =~/^##/){print unless $verbose ;next}
 		elsif($_ =~/^#CHROM/){
 			print "##INFO=<ID=CompoundHet,Number=0,Type=Flag,Description=\"Identified as heterozygous from mom and dad while considering phase\">\n";
 			print "##INFO=<ID=CompoundHetEffects,Number=.,Type=String,Description=\"Types of variants causing the compoundHet\">\n";	
@@ -48,16 +48,17 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 		else{
 			chomp;
 			@LINE=split("\t",$_);
-			$firstSymbol=&readLine($_); 
-			print STDERR "Line NUMBER $. GENE SYMBOL=$firstSymbol\n" if ($verbose);
+			#Get gene and effect
+			($firstSymbol,$getGeneEffect)=&readLine($_); 
 			if ($firstSymbol =~ /^0$/)
 				{
-				print $_."\n";
-				print STDERR "FirstSymbol=0 or no match on the impact so moving on\n" if ($verbose);
+				print $_."\n" unless $verbose;
+				print STDERR "FirstSymbol=0 ($firstSymbol) or no match on the impact so moving on from $LINE[1]\n" if ($verbose);
 				next;
 			};
 			$GT=&calcGT($_);
-			$getGeneEffect=&getGeneEffect($LINE[7]);
+print "\n#############################################\n$LINE[7]\n##############################################\n" if $verbose;
+		#	$getGeneEffect=&getGeneEffect($LINE[7]);
 			#print "\n\n$firstSymbol eq $gene\n\n";
 			if ($firstSymbol eq $gene) {
 				#push into ARRAY
@@ -65,7 +66,6 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 				push (@gt,$GT);
 				push (@getGeneEffect,$getGeneEffect);
 				#print @array."same\n";
-				print STDERR "First SYMBOL ($firstSymbol) equal gene ($gene)\n" if ($verbose);
 			}
 			else{
 				if($gene ne "start") 
@@ -74,15 +74,15 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 					if (scalar(@array) eq 1){
 						#print "POS2\n";
 						print "@array\n";
-						print STDERR "There is only one entry, so I am printing it\n" if ($verbose);
+print STDERR "There is only one entry, so I am printing it\n" if ($verbose);
 					}
 					else{
 						my $line;
 						@gt=uniq(@gt);
 						$lenGT=scalar(@gt);
-						print STDERR "lenGT=$lenGT\t and EFFECTS=@getGeneEffect\n" if ($verbose);
-						#@getGeneEffect=uniq(@getGeneEffect);
+			#			print STDERR "lenGT=$lenGT\t and EFFECTS=@getGeneEffect\n" if ($verbose);
 						$EFFECTS=join(",",@getGeneEffect);
+print "\nLINE 86 EFFECTS=$EFFECTS\n" if $verbose;
 						for my $VCFLINES (@array){
 							my @NEWLINE=split("\t",$VCFLINES);
 							if($lenGT>1){
@@ -93,6 +93,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 							else{
 								$line= join ("\t",@NEWLINE)."\n";#print "POS4\n";
 								$line=~s/\t$//;
+print "NO JOY\n" if $verbose;
 								print $line;
 							}
 						}
@@ -119,7 +120,10 @@ else{
 	for my $VCFLINES (@array){
 		my @NEWLINE=split("\t",$VCFLINES);
 		if($lenGT>1){
-			$line= join ("\t",@NEWLINE[0..6],"CompoundHet;@NEWLINE[7]",@NEWLINE[8..@NEWLINE])."\n";
+		$EFFECT=join('|',@getGeneEffect);
+                $line= join ("\t",@NEWLINE[0..6],"CompoundHet;CompoundHetEffects=$EFFECT;@NEWLINE[7]",@NEWLINE[8..@NEWLINE])."\n";
+
+#		$line= join ("\t",@NEWLINE[0..6],"CompoundHet;@NEWLINE[7]",@NEWLINE[8..@NEWLINE])."\n";
 			$line=~s/\t\n/\n/;
 			print $line;
 			}
@@ -134,11 +138,17 @@ close VCF;
 			
 			
 sub readLine(){
+	#Readline function makes sure there is an effect,
+	#checks that the genotypes are approapriate
+	#and returns the gene symbol and effects
+
 	($line)= @_;
 	@NEWLINE=split("\t",$line);
 	#Make sure the Effect is present
-	if ($line !~ /$limEffect/){print STDERR "could not find any effect data\n" if ($verbose);
-	return 0}
+	if ($line !~ /$limEffect/){
+		print STDERR "could not find any effect data\n" if ($verbose);
+		return 0
+	}
 	#print  "line $counter\n" if ($verbose);
 	$counter++;
 	#Get Genotypes
@@ -152,12 +162,12 @@ sub readLine(){
 	#print "CHECK=$check\n";
 	if (($check eq "0")||($check2 eq "0")){	
 		print STDERR "FAILED because of CHECK1=$check\tCHECK2=$check2\n" if ($verbose);
-		return 0;
+		$geneSymbol=0;
 	}
 	else{
-	$geneSymbol=&getGeneSymbol($NEWLINE[7]);
-	#print "GENE SYMBOL - $geneSymbol\n";
-	return $geneSymbol;
+	($geneSymbol,$effects)=&getGeneSymbol($NEWLINE[7]);
+#	return $geneSymbol;
+	return($geneSymbol,$effects);
 	}
 }
 
@@ -239,23 +249,25 @@ sub getGeneSymbol(){
 	my ($geneSymbol,$tag,$effect,@pairs);
 	#Gene gene symbol
 	my @INFO=split(/;/,$line);
+	$geneSymbol=0;
 	for (my $i=0;$i<@INFO;$i++){
-		$tag=$INFO[$i];#print "Looking at $tag in $i of ".scalar(@INFO)."\n" if ($verbose);
+		$tag=$INFO[$i];# print "Looking at $tag in $i of ".scalar(@INFO)."\n" if ($verbose);
 		$tag=~s/\|//g;
 		#split on = to match true value
 		if($tag=~/=/){
 			@pairs=split(/=/,$tag);
-		#	print "Looking at @pairs\n" if ($verbose);
-			#if (!$pairs[1]) {return 0};#ignore any incorrect labels
 			#Remove SNPEFF
 			#if($pairs[0]=~/snpeff.Gene_name|SAVANT_GENE|CAVA_GENE/){$geneSymbol=$pairs[1];
 			if($pairs[0]=~/CAVA_GENE/){$geneSymbol=$pairs[1];
-				print "GENE SYMBOL recognized as $pairs[1]\n" if ($verbose)};
+#			print "GENE SYMBOL recognized as $pairs[1]\n" if ($verbose)
+			};
+
 			#Now count if MODERATE or HIGH
-			if($pairs[0]=~/CAVA_EFFECT/){$effect=$pairs[1]};
+			if($pairs[0]=~/CAVA_SO/){$effect=$pairs[1]};
 		}
 	}
-	return $geneSymbol;
+	print "---------------------\nGENE SYMBOL recognized as $geneSymbol\nAND\neffect=$effect\n--------------------\n" if ($verbose);
+	return ($geneSymbol,$effect);
 }
 
 ######################################################################################
@@ -270,12 +282,12 @@ sub getGeneEffect(){
 		if($tag=~/=/){
 			@pairs=split(/=/,$tag);#next if (!$pairs[1]);#ignore any incorrect labels
 			#print "PAIRS=@pairs\n";
-			if($pairs[0]=~/CAVA_EFFECT/){
+			if($pairs[0]=~/CAVA_SO/){
 				$effect=$pairs[1];
-				print "\n\neffect=$pairs[1];\n" if ($verbose);
-				};	
+			};	
 		}
 	}
+        print "\neffect=$pairs[1] FROM LINE=$line\n" if ($verbose);
 	return $effect;
 }
 ######################################################################################
@@ -314,7 +326,7 @@ sub calcGT(){
 	my $line=shift(@_);
 	my $geneSymbol="";
 	my @LINE=split("\t",$line);
-	print  "line $counter\n" if ($verbose);$counter++;
+#	print  "line $counter\n" if ($verbose);$counter++;
 	#Get Genotypes
 	$dadGT=$LINE[$dadCol];@tmp=split(":",$dadGT);$dadGT=$tmp[0];
 	$momGT=$LINE[$momCol];@tmp=split(":",$momGT);$momGT=$tmp[0];
@@ -337,19 +349,18 @@ sub FreqCheck(){
 		if($tag=~/=/){
 			@pairs=split(/=/,$tag);
 			if($pairs[0]=~/ALL_maf|ExAC.Info.AF|ExAC_r03_GRCh37_nodups.INFO.AF/){$maf=$pairs[1];
-			print "my MAF = $maf\n\n" if ($verbose);
+		#	print "my MAF = $maf\n\n" if ($verbose);
 			};
 		}
 	}
 	
 	
 	if ($maf>$maxFreq){
-		print STDERR "The variant is too frequent\n" if ($verbose);
-		print STDERR "THE MAF=$maf and the maxFreq is set to $maxFreq\n" if ($verbose);
+	#	print STDERR "The variant is too frequent\n" if ($verbose);
+	#	print STDERR "THE MAF=$maf and the maxFreq is set to $maxFreq\n" if ($verbose);
 		return 0}
 	else{
 		return 1
 		}
-	;
 }
 ######################################################################################

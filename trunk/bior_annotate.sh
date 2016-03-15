@@ -39,7 +39,8 @@ cat << EOF
 ##      -t    Export table as well as VCF [1]
 ##				Version 1: Seperate columns for Depth, GQ, AD, and GT per sample
 ##				Version 2: First N columns like VCF, one colulmn containing sample names
-##      -T    tool info file from GGPS
+##      -T    tool info file
+##	-e    This option substitutes and expression to blank (e.g. some unecessary info frorm bior) [bior\.\.|INFO\.|Info\.|bior\.]
 ##      -x    path to temp directory [default: cwd]
 ##
 ##
@@ -89,7 +90,7 @@ catalogs=${BIOR_ANNOTATE_DIR}/config/catalog_file
 drills=${BIOR_ANNOTATE_DIR}/config/drill_file
 tool_info="${BIOR_ANNOTATE_DIR}/config/tool_info.txt"
 memory_info="${BIOR_ANNOTATE_DIR}/config/memory_info.txt"
-
+editLabel="bior\.\.|INFO\.|Info\.|bior\."
 
 ##################################################################################
 ###
@@ -241,7 +242,6 @@ export PYTHONPATH=${PERLLIB}
 export PERL5LIB=${PERL5LIB}
 export SCRIPT_DIR=${BIOR_ANNOTATE_DIR}/scripts
 
-
 INFO_PARSE=${SCRIPT_DIR}/Info_extract2.pl
 VCF_SPLIT=${SCRIPT_DIR}/VCF_split.pl
 check_variable "$TOOL_INFO:BIOR_PROFILE" $BIOR_PROFILE
@@ -277,13 +277,6 @@ fi
 ###     QC check all the inputs
 ###
 ##################################################################################
-
-
-#Create Trim function
-if [ -z "$editLabel" ]
-then
-	editLabel="bior\.\.|INFO\.|Info\.|bior\."
-fi
 
 ##Validate catalog file
 #Make sure there are 3 columns
@@ -368,6 +361,17 @@ do
 		#echo "Checking $trim"
 		#CHECK=`zcat $CATALOG|head -5000|grep -w ${trim}|head -1`
 		CHECK=`grep -w ${trim} ${CATALOG/tsv.bgz/}*columns.tsv`
+		PASS=`perl -pne 's/\t\n//' {CATALOG/tsv.bgz/}*columns.tsv|awk -F'\t' '(NF!=4 && $1 !~/^#/)'`
+		
+		if [ ! -z "$PASS" ]
+		then
+			echo "##### ERROR ###############"
+                        echo "Missing description in  $CATALOG"
+                        echo "Check your $catalogs"
+			echo "PASS = $PASS"
+                        exit 1
+                fi
+			
 		if [ -z "$CHECK" ]
 		then
 			echo "##### ERROR ###############"
@@ -379,6 +383,8 @@ do
 	done
 	let NUM_ROWS-=1;
 done
+
+
 echo "All drill values are validated"
 
 ##################################################################################
@@ -411,11 +417,12 @@ NUM_CATALOGS_TO_DRILL=`awk 'END{print NR }' $drills`
 # Create script to annotate the VCF
 cat << EOF >> annotate.sh
 #!/usr/bin/env bash
+set -x
+
 source $BIOR_PROFILE
 source $tool_info
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
 
-set -x
 VCF=\$1
 CWD_VCF=\`basename \$1\`
 DRILL_FILE=$drills
@@ -452,7 +459,7 @@ do
     exit 100
   fi
 
-  cat \$VCF | bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval bior_drill \${drill_opts} | bior_tjson_to_vcf > \$CWD_VCF.\$count
+  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
 
   START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
   END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`

@@ -63,8 +63,9 @@ print "GATK_path=" + GATK_path
 print "JAVA=" + JAVA
 print JAVA+ ' -Xmx1G '+ '-jar '+ GATK_path + '/GenomeAnalysisTK.jar '+ '-K /biotools/biotools/gatk/current/volety.rama_mayo.edu.key '+ '-et '+ 'NO_ET '+ '-T '+ 'SelectVariants '+ '-R '+ ref_path+ ' --variant '+ VCF6samples+ ' -o '+TMP_DIR + '/VCF-3_no_genotype.vcf '+ '-xl_sf '+ TMP_DIR + '/exclude_samples.txt '+ '-env '
 
-process = Popen([JAVA, '-Xmx1G', '-jar', GATK_path + '/GenomeAnalysisTK.jar', '-K', '/biotools/biotools/gatk/current/volety.rama_mayo.edu.key', '-et', 'NO_ET', '-T', 'SelectVariants', '-R', ref_path, '--variant', VCF6samples, '-o',TMP_DIR + '/VCF-3_no_genotype.vcf', '-xl_sf', TMP_DIR + '/exclude_samples.txt', '-env'], stdout=PIPE, stderr=PIPE)
+i#process = Popen([JAVA, '-Xmx1G', '-jar', GATK_path + '/GenomeAnalysisTK.jar', '-K', '/biotools/biotools/gatk/current/volety.rama_mayo.edu.key', '-et', 'NO_ET', '-T', 'SelectVariants', '-R', ref_path, '--variant', VCF6samples, '-o',TMP_DIR + '/VCF-3_no_genotype.vcf', '-xl_sf', TMP_DIR + '/exclude_samples.txt', '-env'], stdout=PIPE, stderr=PIPE)
 
+process = Popen([JAVA, '-Xmx1G', '-jar', GATK_path + '/GenomeAnalysisTK.jar', '-T', 'SelectVariants', '-R', ref_path, '--variant', VCF6samples, '-o',TMP_DIR + '/VCF-3_no_genotype.vcf', '-xl_sf', TMP_DIR + '/exclude_samples.txt', '-env'], stdout=PIPE, stderr=PIPE)
 
 out_popen=process.communicate()
 print out_popen
