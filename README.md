@@ -1,5 +1,7 @@
+README instructions
 
-
+  
+```
 ##########################################################################################################
 ##
 ## Script Options:
@@ -56,4 +58,4 @@ Examples:
                        column 2 is what features you want to drill out of that catalog
 
                        The name in the drill_file must match the name in the catalog_file EXACTLY
-
+```
