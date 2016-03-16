@@ -290,13 +290,12 @@ fi
 RES=`cut -f2 $catalogs |sort -u`
 for x in $RES
 do
-	CHECK=""
-	CHECK=`which $x`
+	CHECK=${BIOR}/${x}
 	if [ -z "$CHECK" ]
 	then
 		echo "##### ERROR ###############"
 		echo "Can't find the $x command"
-		echo "Check your $catalogs"
+		echo "Check your BIOR setting in your tool info"
 		exit 100
 	fi
 done
@@ -459,7 +458,7 @@ do
     exit 100
   fi
 
-  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
+  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG |  ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
 
   START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
   END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`
