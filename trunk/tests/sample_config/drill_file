@@ -1,0 +1,9 @@
+Clinvar_20151008_GRCh37	clinical_significance,review_status,all_submitters,all_traits,pathogenic,conflicted
+ExAC_r03_GRCh37_nodups	INFO.AF,INFO.AC_Het,INFO.AC_Hom,INFO.AC_NFE,INFO.AN_NFE
+HGMD_2015Q2_GRCh37_nodups	CLASS,PHEN,PubMed
+dbSNP_142_GRCh37p13	ID
+dbNSFP_v3a_GRCh37	CaddPhred,LrtPred,MetalrPred,MetalrRankscore,MetasvmRankscore,Polyphen2HdivPred,Polyphen2HdivRankscore,ProveanConvertedRankscore,ProveanPred,SiftConvertedRankscore,SiftPred,Vest3Rankscore
+ESP_V2_GRCh37	ALL._maf,AA._maf,EA._maf
+1000genomes_20130502_GRCh37_nodups	INFO.AFR_AF,INFO.AMR_AF,INFO.AC,INFO.AN
+BlatED	ED
+OMIM_phenotypes	name
