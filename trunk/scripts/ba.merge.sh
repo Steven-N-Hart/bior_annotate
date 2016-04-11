@@ -6,7 +6,7 @@
 ##################################################################################
 echo "Options specified: $@"
 ##fix
-while getopts "h:v:o:t:T:d:r:ce:lD:" OPTION; do
+while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
   case $OPTION in
     h) echo "Read the instructions"
         exit ;;

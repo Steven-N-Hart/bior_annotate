@@ -43,8 +43,11 @@ mkdir $TEST_DIR
 ### Source utility files that contain shared functions
 source "$BIOR_ANNOTATE/tests/utils/common_functions.sh"
 
-# For debug, uncomment this line:
+# For print level, specify debug, dev, or prod (prod is recommended for automated tests)
 PRINT_LEVEL="debug"
+
+# For debug, uncomment this line:
+DEBUG="TRUE"
 
 ### Begin test functions
 
@@ -63,20 +66,26 @@ PRINT_LEVEL="debug"
 # 
 # Returns:
 #   0 - success, all checks passed
-#   1 - file was not generated or is zero-length
-#   2 - VCF exists, but does not have a valid format
+#   1 - VCF did not pass validation
+#   2 - Tabix index file did not pass validation
 validate_good_path() {
   # Set up input variables
   setup_inputs $TEST_DIR
-  
+
+  # Assume success
+  TEST_RESULT="0"
+
   # Call bior_annotate.sh
+  QUEUE="NA"
+  call_bior_annotate $TEST_DIR
 
-  # Test whether VCF was created
-
-  basic_file_validation all_tests.sh
+  # Test whether expected files were created
+  file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi"
   RETURN_CODE=$?
 
   print_results validate_good_path $RETURN_CODE
+
+  cleanup_test $TEST_DIR
 
   return $?
   

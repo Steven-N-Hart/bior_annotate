@@ -68,3 +68,38 @@ basic_dir_validation() {
   return 0
 }
 
+# Function: file_list_validation
+# Description:
+#   Performs basic_file_validation for a list of files:
+#
+# Arguments: 
+#   $1 - quoted, space-separated list of files: "file1 file2"
+#
+# Usage: 
+#   file_list_validation "file1 file2 file3"
+# 
+# Returns:
+#   0 - success, all checks passed
+#   index - 1-based index of file in list that failed validation (e.g., an error in file1 -> 1)
+file_list_validation() {
+  COUNTER=0
+  LIST=$1
+
+  for FILE in $LIST
+  do
+    let COUNTER=$COUNTER+1
+    echo "File #$COUNTER"
+    basic_file_validation "$FILE"
+    RETURN_CODE=$?
+
+    if [[ "$RETURN_CODE" != "0" ]]
+    then
+      log "ERROR with $FILE - RC=$RETURN_CODE" 
+      echo $COUNTER
+      return $COUNTER
+    fi
+  done
+
+  return 0
+}
+
