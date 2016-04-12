@@ -458,7 +458,7 @@ do
     exit 100
   fi
 
-  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG |  ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
+  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/\$CATALOG_COMMAND -d \$CATALOG |  ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
 
   START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
   END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`
