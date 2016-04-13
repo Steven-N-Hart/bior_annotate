@@ -36,9 +36,10 @@ cat << EOF
 ##      -s    Flag to turn on SNPEFF
 ##      -a    Flag to turn off CAVA annotation
 ##      -Q    queue override (e.g. 1-day) [defaults to what is in the tool_info]
+##              * Use -Q NA for standalone mode
 ##      -t    Export table as well as VCF [1]
-##				Version 1: Seperate columns for Depth, GQ, AD, and GT per sample
-##				Version 2: First N columns like VCF, one colulmn containing sample names
+##              -t 1: Separate columns for Depth, GQ, AD, and GT per sample
+##              -t 2: First N columns like VCF, one colulmn containing sample names
 ##      -T    tool info file
 ##	-e    This option substitutes and expression to blank (e.g. some unecessary info frorm bior) [bior\.\.|INFO\.|Info\.|bior\.]
 ##      -x    path to temp directory [default: cwd]
