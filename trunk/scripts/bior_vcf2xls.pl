@@ -40,7 +40,7 @@ if (defined $output) {
 
 # read in bior_config.txt
 my @annotation_fields = ();
-open CONFIG, "<$bior_config" or die "opening $bior_config\n";
+open CONFIG, "<$bior_config" or die "error opening $bior_config\n";
 while(<CONFIG>){
 	my $row = $_;
 	chomp $row;
