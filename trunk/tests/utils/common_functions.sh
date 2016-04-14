@@ -160,9 +160,9 @@ cleanup_test() {
   # If we reach this point, directory validation passed. It should be safe to delete from here.
   if [[ "$DEBUG" == "FALSE" ]]
   then 
-    rm $DESTINATION_DIR/.bior.*/*
-    rm $DESTINATION_DIR/.bior.*
-    rm $DESTINATION_DIR/
+    rm -v "$DESTINATION_DIR/.bior.*/*"
+    rmdir -v "$DESTINATION_DIR/.bior.*"
+    rmdir -v "$DESTINATION_DIR/"
   else
     log "Not deleting files in $DESTINATION_DIR because DEBUG is enabled." 
   fi
@@ -283,9 +283,5 @@ setup_inputs() {
     cp $FILE $DESTINATION_DIR/
   done
 
-  # Assume success
-  EXIT_CODE=0
-
-  return $EXIT_CODE
 
 }
