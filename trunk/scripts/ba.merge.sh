@@ -91,11 +91,11 @@ then
 	#mv ${outname}.xls ../
 	if [ "$table" == 1 ]
 	then
-		$PERL $DIR/bior_vcf2xls.pl -i ${outname}.vcf -o ${outname}.xls -c drill.table
+		$PERL $DIR/bior_vcf2xls.pl -i ${outname}.vcf -o ${outname}.xls -c $CREATE_DIR/drill.table
 	fi
 	if [ "$table" == 2 ]
 	then
-		DRILLS=`cat drill.table|tr "\n" ","`
+		DRILLS=`cat $CREATE_DIR/drill.table|tr "\n" ","`
 		$PERL $DIR/Info_extract2.pl ${outname}.vcf -q $DRILLS|grep -v "^##" >  ${outname}.xls
 	fi
 fi	
