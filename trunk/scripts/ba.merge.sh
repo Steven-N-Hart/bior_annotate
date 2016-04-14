@@ -8,22 +8,25 @@ echo "Options specified: $@"
 ##fix
 while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
   case $OPTION in
+    c) catalogs=$OPTARG ;;
+    d) CREATE_DIR=$OPTARG ;;
+    D) DIR=$OPTARG ;;
+    e) editLabel=$OPTARG ;;
     h) echo "Read the instructions"
         exit ;;
+    l) LOG="TRUE" ;;
     o) outname=$OPTARG ;;
+    r) drill=$OPTARG ;;
     t) table=$OPTARG ;;
-    d) CREATE_DIR=$OPTARG ;;
-	T) tool_info=$OPTARG ;;
-	c) catalogs=$OPTARG ;;
-	r) drill=$OPTARG ;;
-	e) editLabel=$OPTARG ;;
-	l) LOG="TRUE" ;;
-	D) DIR=$OPTARG ;;
+    T) tool_info=$OPTARG ;;
+    v) echo "WARNING: option -v is deprecated." ;;
    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
        usage
        exit ;;
     :) echo "Option -$OPTARG requires an argument. See output file for usage." >&2
        usage
+       exit ;;
+    *) echo "option $OPTION not recognized."
        exit ;;
   esac
 done
