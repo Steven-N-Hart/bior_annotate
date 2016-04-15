@@ -73,7 +73,7 @@ call_bior_annotate() {
 
   if [ -z "$INPUT_VCF" ]
   then
-    INPUT_VCF="test.vcf"
+    INPUT_VCF="$DESTINATION_DIR/test.vcf"
   fi
 
   if [ -z "$MEMORY_INFO" ]
@@ -102,41 +102,16 @@ call_bior_annotate() {
   fi
 
   # Ensure that all values are valid
-  basic_file_validation "$BIOR_CATALOGS"
+  file_list_validation "$BIOR_CATALOGS $BIOR_DRILLS $INPUT_VCF $MEMORY_INFO $TOOL_INFO"
+  RC=$?
+
   if [[ "$RC" != "0" ]]
-  then
-    log "BIOR_CATALOGS=$BIOR_CATALOGS does not point to a valid file - RC: $RC"
+  then    
+    log "Failure validating files - $RC"
     exit 1
   fi
 
-  basic_file_validation "$BIOR_DRILLS"
-  if [[ "$RC" != "0" ]]
-  then
-    log "BIOR_DRILLS=$BIOR_DRILLS does not point to a valid file - RC: $RC"
-    exit 1
-  fi
-
-  basic_file_validation "$INPUT_VCF"
-  if [[ "$RC" != "0" ]]
-  then
-    log "INPUT_VCF=$INPUT_VCF does not point to a valid file - RC: $RC"
-    exit 1
-  fi
-
-  basic_file_validation "$MEMORY_INFO"
-  if [[ "$RC" != "0" ]]
-  then
-    log "MEMORY_INFO=$MEMORY_INFO does not point to a valid file - RC: $RC"
-    exit 1
-  fi
-
-  basic_file_validation "$TOOL_INFO"
-  if [[ "$RC" != "0" ]]
-  then    log "TOOL_INFO=$TOOL_INFO does not point to a valid file - RC: $RC"
-    exit 1
-  fi
-
-  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $DESTINATION_DIR/$INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -l -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
+  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -l -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
 
   log "Calling: $CMD" "debug"
   eval $CMD
@@ -179,6 +154,15 @@ cleanup_test() {
   else
     log "Not deleting files in $DESTINATION_DIR because DEBUG is enabled." 
   fi
+
+  # Unset variables for clean environment:
+  DESTINATION_DIR=""
+  TEST_VCF="" 
+  TOOL_INFO="" 
+  CATALOG_FILE="" 
+  DRILL_FILE="" 
+  MEMORY_INFO=""
+  INPUT_VCF=""
 
   # Assume the deletes worked.
   return 0
