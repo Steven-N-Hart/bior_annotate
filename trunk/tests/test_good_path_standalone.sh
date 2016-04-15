@@ -69,9 +69,6 @@ DEBUG="TRUE"
 #   1 - VCF did not pass validation
 #   2 - Tabix index file did not pass validation
 validate_good_path() {
-  # Set up input variables
-  setup_inputs $TEST_DIR
-
   # Assume success
   TEST_RESULT="0"
 
@@ -83,24 +80,42 @@ validate_good_path() {
   file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi"
   RETURN_CODE=$?
 
-  print_results validate_good_path $RETURN_CODE
-
-  cleanup_test $TEST_DIR
-
-  return $?
+  return $RETURN_CODE
   
 }
 
-## Assume all tests will pass
+### Starting values
+# Assume all tests will pass
 EXIT_CODE=0
 
-## Begin test validations
+# Start with test 1
+TEST_NUMBER=1
 
-validate_good_path
-RETURN_CODE=$?
-if [ ! "$RETURN_CODE" -eq "0" ]
-then
-  EXIT_CODE=1
-fi
+# Tests executed:
+TESTS="validate_good_path validate_good_path_table"
+
+### Run tests in list
+for TEST in $TESTS
+do
+  ## Begin test validations
+  setup_inputs $TEST_DIR
+
+  $TEST
+
+  RETURN_CODE=$?
+  print_results "$TEST_NUMBER" "$TEST" "$RETURN_CODE" 
+
+  # if successful, no need to keep test directory
+  if [[ "$RETURN_CODE" == "0" ]]
+  then
+    cleanup_test $TEST_DIR
+  else
+    EXIT_CODE=1
+  fi
+
+  let TEST_NUMBER=$TEST_NUMBER+1
+done
+
+print_summary
 
 exit $EXIT_CODE

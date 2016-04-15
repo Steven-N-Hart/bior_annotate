@@ -7,6 +7,12 @@
 # Default is that debug mode is disabled. This flag can be overridden by files that source this file.
 DEBUG="FALSE"
 
+# This variable holds the summary information for all tests executed in this run.
+TEST_SUMMARY=""
+NUM_TESTS="0"
+NUM_PASSED="0"
+NUM_FAILED="0"
+
 ### Obtain functions defined in other files:
 source "$BIOR_ANNOTATE/tests/utils/file_validation.sh"
 source "$BIOR_ANNOTATE/tests/utils/log.sh"
@@ -177,8 +183,9 @@ cleanup_test() {
 #   Prints the results of a test based on its return code
 #
 # Arguments: 
-#   $1 - Test name (should match name of function to ease searching)
-#   $2 - Return code from test
+#   $1 - Test number (number in sequence)
+#   $2 - Test name (should match name of function to ease searching)
+#   $3 - Return code from test
 #
 # Usage: 
 #   print_results <test_name> <return_code>
@@ -187,23 +194,49 @@ cleanup_test() {
 #   0 - success
 #   1 - test reported failure
 print_results() {
-  TESTNAME=$1
-  RETURN_CODE=$2
+  TEST_NUMBER=$1
+  TESTNAME=$2
+  RETURN_CODE=$3
 
   # Assume success
   EXIT_CODE=0
 
+  let NUM_TESTS=$NUM_TESTS+1
   if [ "$RETURN_CODE" -eq "0" ]
   then
     RESULT="PASSED"
+    let NUM_PASSED=$NUM_PASSED+1
   else
     RESULT="FAILED with rc $RETURN_CODE"
+    let NUM_FAILED=$NUM_FAILED+1
     EXIT_CODE=1
   fi
 
-  log "TEST: $TESTNAME $RESULT"
+  TEST_RESULT="TEST #$TEST_NUMBER: $TESTNAME $RESULT"
+  log "$TEST_RESULT"
+  TEST_SUMMARY="$TEST_SUMMARY\n$TEST_RESULT"
+}
 
-  return $EXIT_CODE
+# Function: print_summary
+# Description:
+#   Prints summary of all tests that were included in 
+#
+# Arguments: None
+#
+# Usage:
+#   print_summary
+#
+# Returns:
+#   0 - success
+#   1 - failed
+print_summary() {
+  log ""
+  log "==================== TEST RESULTS ====================="
+  log ""
+  log "Total Tests: $NUM_TESTS"
+  log "Total Passed: $NUM_PASSED"
+  log "Total Failed: $NUM_FAILED"
+  log "$TEST_SUMMARY"
 }
 
 # Function: setup_inputs

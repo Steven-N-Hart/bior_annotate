@@ -37,6 +37,6 @@ log() {
   
   if [ "$PRINT_MESSAGE" == "true" ]
   then
-    echo "$MESSAGE"
+    echo -e "$MESSAGE"
   fi
 }
