@@ -19,7 +19,7 @@ QUEUE="1-day"
 NOTIFICATION_OPTION="ae"
 
 #Base funcitons
-PYTHON="/usr/local/biotools/python/2.7/bin"
+PYTHON="/usr/local/biotools/python/2.7.10/bin"
 PYTHONLIB="/data2/bsi/RandD/pacbio/smrtanalysis-1.2.1/analysis/lib/python2.5:/projects/bsi/bictools/apps/metadata/genomedata/arch/Linux-x86_64/lib/python2.5:/projects/bsi/bictools/apps/metadata/genomedata/arch/Linux-x86_64/lib/python2.7:/data5/bsi/bictools/lib/python2.7/:/home/m087494/usr/local/biotools/python/2.7/lib/python2.7/site-packages:/projects/bsi/bictools/apps/language/pysam/0.6/"
 PERL="/usr/bin/perl"
 PERLLIB="/usr/local/biotools/perl/5.10.0/lib/site_perl/5.10.0/x86_64-linux/"
