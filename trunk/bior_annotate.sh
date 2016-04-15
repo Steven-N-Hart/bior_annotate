@@ -21,7 +21,10 @@ cat << EOF
 ##
 ## Script Options:
 ##   Required:
-##      -o    Output file name [required] ***Name only, not PATH***
+##      -o    Output file prefix [required] 
+##              Note: ***Name only, not PATH***
+##              Result files will take the form: <output_prefix>.vcf.gz, etc.
+##      -O    May be used to specify an output directory [recommended, default:cwd]
 ##      -v    path to the VCF to annotate     [required]
 ##   Optional:
 ##      -c    path to catalog file
@@ -32,7 +35,6 @@ cat << EOF
 ##      -L    Do not add links to VCF [default is set to TRUE]
 ##      -M    memory info file from GGPS
 ##      -n    Number of lines to split the data into  [default:20000]
-##      -O    output directory [cwd]
 ##      -s    Flag to turn on SNPEFF
 ##      -a    Flag to turn off CAVA annotation
 ##      -Q    queue override (e.g. 1-day) [defaults to what is in the tool_info]
