@@ -47,7 +47,7 @@ source "$BIOR_ANNOTATE/tests/utils/common_functions.sh"
 PRINT_LEVEL="debug"
 
 # For debug, uncomment this line:
-DEBUG="TRUE"
+#DEBUG="TRUE"
 
 ### Begin test functions
 
@@ -58,17 +58,18 @@ DEBUG="TRUE"
 #   2. Checks to ensure that result VCF exists at output location.
 #
 # Arguments: 
-#   $1 - Path to test VCF
-#   $2 - Path to output directory
+#   $1 - Path to output directory
 #
 # Usage: 
-#   validate_good_path $testvcf $outputdir
+#   validate_good_path $outputdir
 # 
 # Returns:
 #   0 - success, all checks passed
 #   1 - VCF did not pass validation
 #   2 - Tabix index file did not pass validation
 validate_good_path() {
+  local TEST_DIR=$1
+
   # Assume success
   TEST_RESULT="0"
 
@@ -84,7 +85,94 @@ validate_good_path() {
   
 }
 
-### Starting values
+# Function: validate_good_path_format_version_1
+# Description:
+#   Performs the following basic good path validation:
+#   1. Run validate_good_path with table format version 1
+#
+# Arguments: 
+#   $1 - Path to output directory
+#
+# Usage: 
+#   validate_good_path_format_version_1 $outputdir
+# 
+# Returns:
+#   0 - success, all checks passed
+#   1 - VCF did not pass validation
+#   2 - Tabix index file did not pass validation
+#   3 - Tab-separated file did not pass validation
+validate_good_path_table_format_version_1 () {
+  local TEST_DIR=$1
+
+  # Call bior_annotate.sh
+  validate_good_path_table "$TEST_DIR" 1
+
+  RETURN_CODE=$?
+
+  return $RETURN_CODE
+
+}
+
+# Function: validate_good_path_format_version_2
+# Description:
+#   Performs the following basic good path validation:
+#   1. Run validate_good_path with table format version 2
+#
+# Arguments: 
+#   $1 - Path to output directory
+#
+# Usage: 
+#   validate_good_path_format_version_1 $outputdir
+# 
+# Returns:
+#   0 - success, all checks passed
+#   1 - VCF did not pass validation
+#   2 - Tabix index file did not pass validation
+#   3 - Tab-separated file did not pass validation
+validate_good_path_table_format_version_2 () {
+  local TEST_DIR=$1
+
+  # Call bior_annotate.sh
+  validate_good_path_table "$TEST_DIR" 2
+
+  RETURN_CODE=$?
+
+  return $RETURN_CODE
+
+}
+
+# Function: validate_good_path
+# Description:
+#   Performs the following basic good path validation:
+#   1. Run bior_annotate on test VCF
+#   2. Checks to ensure that result VCF exists at output location.
+#
+# Arguments: 
+#   $1 - Path to output directory
+#   $2 - Version of table to produce
+#
+# Usage: 
+#   validate_good_path $outputdir
+# 
+# Returns:
+#   0 - success, all checks passed
+#   1 - VCF did not pass validation
+#   2 - Tabix index file did not pass validation
+#   3 - Tab-separated file did not pass validation
+validate_good_path_table() {
+  local TEST_DIR=$1
+  TABLE=$2
+
+  # Call bior_annotate.sh
+  QUEUE="NA"
+  call_bior_annotate $TEST_DIR
+
+  # Test whether expected files were created
+  file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi $TEST_DIR/test_out.xls"
+  RETURN_CODE=$? 
+}
+
+### Initial values
 # Assume all tests will pass
 EXIT_CODE=0
 
@@ -92,23 +180,25 @@ EXIT_CODE=0
 TEST_NUMBER=1
 
 # Tests executed:
-TESTS="validate_good_path validate_good_path_table"
+TESTS="validate_good_path validate_good_path_table_format_version_1 validate_good_path_table_format_version_2"
 
 ### Run tests in list
 for TEST in $TESTS
 do
-  ## Begin test validations
-  setup_inputs $TEST_DIR
+  mkdir $TEST_DIR/$TEST
 
-  $TEST
+  ## Begin test validations
+  setup_inputs "$TEST_DIR/$TEST"
+
+  $TEST $TEST_DIR/$TEST
 
   RETURN_CODE=$?
-  print_results "$TEST_NUMBER" "$TEST" "$RETURN_CODE" 
+  print_results "$TEST_NUMBER" "$TEST" "$RETURN_CODE" "$TEST_DIR/$TEST"
 
   # if successful, no need to keep test directory
   if [[ "$RETURN_CODE" == "0" ]]
   then
-    cleanup_test $TEST_DIR
+    cleanup_test $TEST_DIR/$TEST
   else
     EXIT_CODE=1
   fi
@@ -117,5 +207,7 @@ do
 done
 
 print_summary
+
+rmdir -v "$TEST_DIR"
 
 exit $EXIT_CODE

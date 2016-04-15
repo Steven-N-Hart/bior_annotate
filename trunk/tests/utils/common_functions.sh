@@ -37,6 +37,7 @@ source "$BIOR_ANNOTATE/tests/utils/log.sh"
 #   MEMORY_INFO="$BIOR_ANNOTATE/config/memory_info.txt"
 #   OUTPUT_VCF="test_output.vcf"
 #   QUEUE="1-day"
+#   TABLE="0"
 #   TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
 #
 # Usage: 
@@ -90,6 +91,11 @@ call_bior_annotate() {
     QUEUE="1-day"  
   fi
 
+  if [ -z "$TABLE" ]
+  then
+    TABLE="0"
+  fi
+
   if [ -z "$TOOL_INFO" ]
   then
     TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
@@ -130,7 +136,7 @@ call_bior_annotate() {
     exit 1
   fi
 
-  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $DESTINATION_DIR/$INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -l -j AUTO_TEST.bior_annotate. -Q $QUEUE"
+  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $DESTINATION_DIR/$INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -l -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
 
   log "Calling: $CMD" "debug"
   eval $CMD
@@ -166,9 +172,10 @@ cleanup_test() {
   # If we reach this point, directory validation passed. It should be safe to delete from here.
   if [[ "$DEBUG" == "FALSE" ]]
   then 
-    rm -v "$DESTINATION_DIR/.bior.*/*"
-    rmdir -v "$DESTINATION_DIR/.bior.*"
-    rmdir -v "$DESTINATION_DIR/"
+    rm -v "$DESTINATION_DIR/.bior."*/*
+    rmdir -v "$DESTINATION_DIR/.bior."*
+    rm -v "$DESTINATION_DIR/"*
+    rmdir -v "$DESTINATION_DIR"
   else
     log "Not deleting files in $DESTINATION_DIR because DEBUG is enabled." 
   fi
@@ -197,6 +204,7 @@ print_results() {
   TEST_NUMBER=$1
   TESTNAME=$2
   RETURN_CODE=$3
+  TEST_DIRECTORY=$4
 
   # Assume success
   EXIT_CODE=0
@@ -207,7 +215,7 @@ print_results() {
     RESULT="PASSED"
     let NUM_PASSED=$NUM_PASSED+1
   else
-    RESULT="FAILED with rc $RETURN_CODE"
+    RESULT="FAILED with rc $RETURN_CODE (debug data: $TEST_DIRECTORY)"
     let NUM_FAILED=$NUM_FAILED+1
     EXIT_CODE=1
   fi
