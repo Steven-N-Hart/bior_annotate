@@ -316,7 +316,7 @@ echo "$catalogs is validated"
 
 ##Validate drill file
 #Make sure there are 3 columns
-VALIDATE_CATALOG=`awk '{if (NF != 2){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
+VALIDATE_CATALOG=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
 if [ ! -z "$VALIDATE_CATALOG" ]
 then
 	echo $VALIDATE_CATALOG |$PERL -pne 's/L/\nL/g'
@@ -459,7 +459,29 @@ do
     exit 100
   fi
 
-  cat \$VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/\$CATALOG_COMMAND -d \$CATALOG |  ${BIOR}/bior_drill \${drill_opts} | ${BIOR}/bior_tjson_to_vcf > \$CWD_VCF.\$count
+  cat \$VCF | bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval bior_drill \${drill_opts} | bior_tjson_to_vcf > \$CWD_VCF.\$count
+
+  RENAMED_LIST="\$( echo "\$drill" | cut -f3 )"
+  IFS="," RENAMED_COLS=( \$RENAMED_LIST )
+  if [ ! -z "\$RENAMED_COLS" ]
+  then
+    echo "Informational: Detected these renamed_cols: \${RENAMED_COLS[@]}"
+    let i=0
+    for RENAMED_COL in \${RENAMED_COLS[@]};
+    do
+      TERM=\${all_terms[\$i]}
+      if [ ! -z "\$RENAMED_COL" ]
+      then
+        echo "Replacing \$TERM with \$RENAMED_COL"
+        perl -i -pe "s#\$SHORT_NAME\\.\$TERM#\$SHORT_NAME\\.\${RENAMED_COLS[\$i]}#" \$CWD_VCF.\$count
+      else
+        echo "No renaming for \$TERM, skipping."
+      fi
+      let i=\$i+1;
+    done
+  else
+    echo "Informational: Did not detect renamed_cols for \$CATALOG"
+  fi
 
   START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
   END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`
