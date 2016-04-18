@@ -74,6 +74,9 @@ while(<>){
 	my @alt_alleles = split(",",$line[4]);
 	# split multiple alt alleles onto seperate lines
 	for(my $split_rownum = 0; $split_rownum < scalar(@alt_alleles); $split_rownum++){ 
+		# don't print rows if the ALT Allele is "*", meaning that it falls within a deletion
+		next if $alt_alleles[$split_rownum] eq "*";
+
 		print join("\t",@line[0..3])."\t".$alt_alleles[$split_rownum]."\t".join("\t",@line[5..6])."\t";
 		
 		# print out INFO fields
