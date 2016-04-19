@@ -655,7 +655,8 @@ else
 	command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 fi	
 eval "$command" 
-echo "You will be notified by e-mail when your jobs complete"
+echo "You will be notified by e-mail as your jobs are processed. The baMerge job will be the last to complete."
+echo "** NOTE: when submitting to SGE, there will be multiple jobs created. You can monitor your jobs using qstat. **"
 
 #Return to where you started
 if [ ! -z "$TEMPDIR" ]
