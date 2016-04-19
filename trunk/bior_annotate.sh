@@ -283,14 +283,14 @@ fi
 
 ##Validate catalog file
 #Make sure there are 3 columns
-VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $catalogs`
+VALIDATE_CATALOG=`grep -v ^# $catalogs | awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}'`
 if [ ! -z "$VALIDATE_CATALOG" ]
 then
 	echo ${VALIDATE_CATALOG} |$PERL -pne 's/L/\nL/g'
 	exit 100
 fi
 #Make sure the commands exist
-RES=`cut -f2 $catalogs |sort -u`
+RES=`grep -v ^# $catalogs| cut -f2 |sort -u`
 for x in $RES
 do
 	CHECK=${BIOR}/${x}
@@ -303,7 +303,7 @@ do
 	fi
 done
 #Make sure the catalogs exist
-RES=`cut -f3 $catalogs |sort -u`
+RES=`grep -v ^# $catalogs | cut -f3 |sort -u`
 for x in $RES
 do
 	if [ ! -e "$x" ]

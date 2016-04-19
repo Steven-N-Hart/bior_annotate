@@ -49,7 +49,8 @@ source "$BIOR_ANNOTATE/tests/utils/log.sh"
 #   0 - success
 #   1 - failed
 call_bior_annotate() {
-  DESTINATION_DIR=$1
+  local DESTINATION_DIR=$1
+  echo "DESTINATION_DIR=$DESTINATION_DIR"
 
   basic_dir_validation "$DESTINATION_DIR" 
   RC=$?
@@ -63,43 +64,45 @@ call_bior_annotate() {
   # Set up default values used if nothing else overrides them.
   if [ -z "$BIOR_CATALOGS" ]
   then
-    BIOR_CATALOGS="$BIOR_ANNOTATE/config/catalog_file"
+    local BIOR_CATALOGS="$DESTINATION_DIR/catalog_file"
   fi
 
   if [ -z "$BIOR_DRILLS" ]
   then
-    BIOR_DRILLS="$BIOR_ANNOTATE/config/drill_file"
+    local BIOR_DRILLS="$DESTINATION_DIR/drill_file"
   fi
 
   if [ -z "$INPUT_VCF" ]
   then
-    INPUT_VCF="$DESTINATION_DIR/test.vcf"
+    local INPUT_VCF="$DESTINATION_DIR/test.vcf"
   fi
 
   if [ -z "$MEMORY_INFO" ]
   then
-    MEMORY_INFO="$BIOR_ANNOTATE/config/memory_info.txt"
+    local MEMORY_INFO="$DESTINATION_DIR/memory_info.txt"
   fi
 
   if [ -z "$OUTPUT_VCF" ]
   then
-    OUTPUT_VCF="test_out"
+    local OUTPUT_VCF="test_out"
   fi
 
   if [ -z "$QUEUE" ] 
   then
-    QUEUE="1-day"  
+    local QUEUE="1-day"  
   fi
 
   if [ -z "$TABLE" ]
   then
-    TABLE="0"
+    local TABLE="0"
   fi
 
   if [ -z "$TOOL_INFO" ]
   then
-    TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
+    local TOOL_INFO="$DESTINATION_DIR/tool_info.minimal.txt"
   fi
+
+  log "Validating that all files are ready to submit" "debug"
 
   # Ensure that all values are valid
   file_list_validation "$BIOR_CATALOGS $BIOR_DRILLS $INPUT_VCF $MEMORY_INFO $TOOL_INFO"
@@ -154,15 +157,6 @@ cleanup_test() {
   else
     log "Not deleting files in $DESTINATION_DIR because DEBUG is enabled." 
   fi
-
-  # Unset variables for clean environment:
-  DESTINATION_DIR=""
-  TEST_VCF="" 
-  TOOL_INFO="" 
-  CATALOG_FILE="" 
-  DRILL_FILE="" 
-  MEMORY_INFO=""
-  INPUT_VCF=""
 
   # Assume the deletes worked.
   return 0
@@ -252,12 +246,12 @@ print_summary() {
 #   0 - success
 #   1 - failed
 setup_inputs() {
-  DESTINATION_DIR=$1
-  TEST_VCF=$2
-  TOOL_INFO=$3
-  CATALOG_FILE=$4
-  DRILL_FILE=$5
-  MEMORY_INFO=$6
+  local DESTINATION_DIR=$1
+  local TEST_VCF=$2
+  local TOOL_INFO=$3
+  local CATALOG_FILE=$4
+  local DRILL_FILE=$5
+  local MEMORY_INFO=$6
 
   basic_dir_validation $DESTINATION_DIR
 
@@ -292,6 +286,7 @@ setup_inputs() {
     MEMORY_INFO="$BIOR_ANNOTATE/tests/sample_config/memory_info.txt"
   fi
 
+  log "Copying files to test dir" "debug"
   for FILE in "$TEST_VCF" "$TOOL_INFO" "$CATALOG_FILE" "$DRILL_FILE" "$MEMORY_INFO"
   do
     basic_file_validation "$FILE"  

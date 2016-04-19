@@ -88,7 +88,7 @@ file_list_validation() {
   for FILE in $LIST
   do
     let COUNTER=$COUNTER+1
-    echo "File #$COUNTER"
+    log "File #$COUNTER: $FILE" "debug"
     basic_file_validation "$FILE"
     RETURN_CODE=$?
 
