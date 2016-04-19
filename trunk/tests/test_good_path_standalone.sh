@@ -170,6 +170,8 @@ validate_good_path_table() {
   # Test whether expected files were created
   file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi $TEST_DIR/test_out.xls"
   RETURN_CODE=$? 
+
+  return $RETURN_CODE
 }
 
 ### Initial values
