@@ -281,16 +281,23 @@ fi
 ###
 ##################################################################################
 
+# Copy filtered version of drill and catalog files to $outdir and reassign variable.
+grep -v "^#" $catalogs > $outdir/catalog.tmp
+catalogs="$outdir/catalog.tmp"
+
+grep -v "^#" $drills > $outdir/drills.tmp
+drills="$outdir/drills.tmp"
+
 ##Validate catalog file
 #Make sure there are 3 columns
-VALIDATE_CATALOG=`grep -v ^# $catalogs | awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}'`
+VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $catalogs`
 if [ ! -z "$VALIDATE_CATALOG" ]
 then
 	echo ${VALIDATE_CATALOG} |$PERL -pne 's/L/\nL/g'
 	exit 100
 fi
 #Make sure the commands exist
-RES=`grep -v ^# $catalogs| cut -f2 |sort -u`
+RES=`cut -f2 $catalogs |sort -u`
 for x in $RES
 do
 	CHECK=${BIOR}/${x}
@@ -303,7 +310,7 @@ do
 	fi
 done
 #Make sure the catalogs exist
-RES=`grep -v ^# $catalogs | cut -f3 |sort -u`
+RES=`cut -f3 $catalogs |sort -u`
 for x in $RES
 do
 	if [ ! -e "$x" ]
@@ -318,10 +325,10 @@ echo "$catalogs is validated"
 
 ##Validate drill file
 #Make sure there are 3 columns
-VALIDATE_CATALOG=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
-if [ ! -z "$VALIDATE_CATALOG" ]
+VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
+if [ ! -z "$VALIDATE_DRILL" ]
 then
-	echo $VALIDATE_CATALOG |$PERL -pne 's/L/\nL/g'
+	echo $VALIDATE_DRILL |$PERL -pne 's/L/\nL/g'
 	exit 100
 fi
 
