@@ -533,7 +533,7 @@ else
 	cat $VCF|$PERL $VCF_SPLIT | grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
 fi
 
-echo `ls $TEMPDIR/$CWD_VCF`
+#echo `ls $TEMPDIR/$CWD_VCF`
 
 if [ "$CLINICAL" == "TRUE" ]
 then
@@ -553,8 +553,6 @@ then
   echo "ERROR: failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
   exit 100
 fi
-
-set -x
 
 cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|grep -v "^#"|split -d -l $NUM -a 3 - ${CWD_VCF/.gz/}
 
@@ -584,15 +582,17 @@ then
 	for x in ${CWD_VCF}[0-9][0-9][0-9]
 	do
 		sh annotate.sh $x
+    echo ""
 		echo $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
+  echo ""
  echo $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
  cd $START_DIR
  if [[ "$log" != "TRUE"  ]]
  then
-   rm -r ./.bior.${CREATE_DIR}
+   rm -r ./.bior.${CREATE_DIR} $catalogs $drills
  fi
  exit 0
 fi
@@ -681,4 +681,4 @@ then
 	cd $START_DIR
 fi
 
-
+rm $catalogs $drills

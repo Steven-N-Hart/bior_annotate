@@ -4,7 +4,8 @@
 ###     Parse Argument variables
 ###
 ##################################################################################
-##fix
+echo ""
+echo "Running ba.program"
 echo "Options specified: $@"| tr "-" "\n"
 while getopts "D:g:p:M:v:sT:d:t:l:j:hLc" OPTION; do
   case $OPTION in
