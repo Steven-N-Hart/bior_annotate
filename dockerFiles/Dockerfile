@@ -1,6 +1,5 @@
 FROM centos:6
 MAINTAINER Steven N Hart, PhD
-#docker run -it -v /Users/m087494/Desktop/Docker/Data:/home/Data stevenhart/bior_annotate:latest
 
 RUN yum update -y
 RUN yum install -y \
@@ -73,8 +72,8 @@ RUN rm pysam-0.8.3.tar.gz
 RUN wget http://www.well.ox.ac.uk/bioinformatics/Software/Cava-full-latest.tgz
 RUN tar xvzf Cava-full-latest.tgz
 RUN rm Cava-full-latest.tgz
-RUN cd cava-v1.0.0/
-RUN perl -pi -e 's/hg19.fa/\/Data\/references\/hg19.fa/;s/exome_65_GRCh37.gz/\/cava-v1.0.0\/exome_65_GRCh37.gz/;s/dbSNP138.gz/\./' cava-v1.0.0/config.txt
+RUN cd cava-v1.1.1/
+RUN perl -pi -e 's/human_g1k_v37.fasta/\/Data\/references\/hg19.fa/;s/exome_65_GRCh37.gz/\/cava-v1.1.1\/exome_65_GRCh37.gz/;s/dbSNP138.gz/\./' cava-v1.1.1/config.txt
 RUN cd /
 
 #####################################################

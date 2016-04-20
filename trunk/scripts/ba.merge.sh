@@ -4,8 +4,11 @@
 ###     Parse Argument variables
 ###
 ##################################################################################
-echo "Options specified: $@"
-##fix
+
+echo ""
+echo "Running ba.merge"
+echo "Options specified: $@"| tr "-" "\n"
+
 while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
   case $OPTION in
     c) catalogs=$OPTARG ;;
@@ -44,12 +47,12 @@ fi
 ###     Setup configurations
 ###
 ##################################################################################
-echo "using the script in $DIR"
+#echo "using the script in $DIR"
 #Count to make sure there are at least as many variants in the output as were in the input
 for x in $CREATE_DIR/*anno
 do
 PRECWD_VCF=${x/.anno/}
-echo "x=$x and PRECWD_VCF=$PRECWD_VCF"
+#echo "x=$x and PRECWD_VCF=$PRECWD_VCF"
 if [ -z "$PRECWD_VCF"  ];
 then
         echo "Can't find PRECWD_VCF=$PRECWD_VCF ";
