@@ -597,6 +597,23 @@ then
  exit 0
 fi
 
+# Ensure that user is not attempting to use local locations like /tmp, /local1/tmp, or /local2/tmp. 
+# These will fail when submitting to the grid.
+for WORKING_DIR in "$outdir" "$TEMPDIR"
+do
+  for LOCAL_DIR in "/tmp" "/local1/tmp" "/local2/tmp"
+  do
+    if [[ "$WORKING_DIR" == "$LOCAL_DIR"* ]]
+    then
+      echo "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
+      exit 100
+# DEBUG ONLY
+#    else
+#      echo "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR"
+    fi
+  done
+done
+
 # If you are at this point, then you will be submitting jobs to the sun grid engine
 #command -v $SGE_BASE/qsub >/dev/null 2>&1 || { echo >&2 "I require qsub but it's not installed.  Aborting.";exit 1}
 
