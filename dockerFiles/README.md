@@ -17,8 +17,10 @@ samtools faidx references/hg19.fa
 
 
 #Get bior folder
+
+
 > For this demo, make sure your current working directory contains the following elements
-``` 
+
 references/
     hg19.fa.gz
     hg19.fa.gz.fai
