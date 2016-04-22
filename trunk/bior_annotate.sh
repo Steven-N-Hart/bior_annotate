@@ -423,99 +423,6 @@ CURRENT_LOCATION=$PWD
 #Calculate the number of catalogs
 NUM_CATALOGS_TO_DRILL=`awk 'END{print NR }' $drills`
 
-# Create script to annotate the VCF
-cat << EOF >> annotate.sh
-#!/usr/bin/env bash
-set -x
-
-source $BIOR_PROFILE
-source $tool_info
-source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
-
-VCF=\$1
-CWD_VCF=\`basename \$1\`
-DRILL_FILE=$drills
-CATALOG_FILE=$catalogs
-let count=0
-
-while read drill
-do
-  let count=\$count+1
-  SHORT_NAME=\`echo "\$drill" | cut -f1 \`
-
-  CATALOG=\`grep -w "\$SHORT_NAME" \$CATALOG_FILE|cut -f3|head -1\`
-  CATALOG_COMMAND=\`grep -w "\$SHORT_NAME" \$CATALOG_FILE|cut -f2|head -1\`
-  TERMS=\`echo "\$drill" | cut -f2\`
-  IFS=',' all_terms=( \$TERMS )
-  separator=" -p "
-  drill_opts="\$( printf "\${separator}%s" "\${all_terms[@]}" )"
-
-  if [ -z "\$CATALOG" ]
-  then
-    echo "Error parsing CATALOG. Command used: grep -w \"\$SHORT_NAME\" \$CATALOG_FILE|cut -f3|head -1"
-    exit 100
-  fi
-
-  if [ -z "\$CATALOG_COMMAND" ]
-  then
-    echo "Error parsing CATALOG_COMMAND. Command used: grep -w \$SHORT_NAME \$CATALOG_FILE|cut -f2|head -1"
-    exit 100
-  fi
-
-  if [ ! -s "\$VCF" ]
-  then
-    echo "\$VCF not found. Previous step appears to have failed."
-    exit 100
-  fi
-
-  cat \$VCF | bior_vcf_to_tjson | \$CATALOG_COMMAND -d \$CATALOG | eval bior_drill \${drill_opts} | bior_tjson_to_vcf > \$CWD_VCF.\$count
-
-  RENAMED_LIST="\$( echo "\$drill" | cut -f3 )"
-  IFS="," RENAMED_COLS=( \$RENAMED_LIST )
-  if [ ! -z "\$RENAMED_COLS" ]
-  then
-    echo "Informational: Detected these renamed_cols: \${RENAMED_COLS[@]}"
-    let i=0
-    for RENAMED_COL in \${RENAMED_COLS[@]};
-    do
-      TERM=\${all_terms[\$i]}
-      if [ ! -z "\$RENAMED_COL" ]
-      then
-        echo "Replacing \$TERM with \$RENAMED_COL"
-        perl -i -pe "s#\$SHORT_NAME\\.\$TERM#\$SHORT_NAME\\.\${RENAMED_COLS[\$i]}#" \$CWD_VCF.\$count
-      else
-        echo "No renaming for \$TERM, skipping."
-      fi
-      let i=\$i+1;
-    done
-  else
-    echo "Informational: Did not detect renamed_cols for \$CATALOG"
-  fi
-
-  START_NUM=\`cat \$VCF | grep -v '^#' | wc -l\`
-  END_NUM=\`cat \$CWD_VCF.\$count | grep -v '^#' | wc -l\`
-  if [[ ! -s \$CWD_VCF.\${count} || ! \$END_NUM -ge \$START_NUM ]]
-  then
-    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f \$CWD_VCF.\${count} -m annotate.sh -M "bior annotation failed using \$CATALOG_FILE" -p \$VCF -l \$LINENO
-    exit 100
-  fi
-
-  # Set up for next loop
-  if [ "\$count" != 1 ]
-  then
-    let previous=\$count-1
-    if [[ "$DEBUG_MODE" == "NO" ]]
-    then
-      rm \$VCF
-    fi
-  fi
-
-  VCF=\${CWD_VCF}.\${count}
-done <\$DRILL_FILE
-$PERL -pne 's/bior.//g' \$CWD_VCF.\${count} > \${CWD_VCF}.anno 2>&1 /dev/null
-
-EOF
-
 ##################################################################################
 ###
 ###     Split the VCF file into manageable chunks
@@ -581,7 +488,8 @@ if [ "$QUEUE" == "NA" ]
 then
 	for x in ${CWD_VCF}[0-9][0-9][0-9]
 	do
-		sh annotate.sh $x
+
+		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
     echo ""
 		echo $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
