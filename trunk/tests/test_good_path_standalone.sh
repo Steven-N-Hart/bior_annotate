@@ -41,7 +41,7 @@ TEST_DIR="$TEST_DIR/tmp.$RANDOM/"
 mkdir $TEST_DIR
 
 ### Source utility files that contain shared functions
-source "$BIOR_ANNOTATE/tests/utils/common_functions.sh"
+source "$BIOR_ANNOTATE/tests/common_functions.sh"
 
 # For print level, specify debug, dev, or prod (prod is recommended for automated tests)
 PRINT_LEVEL="debug"
