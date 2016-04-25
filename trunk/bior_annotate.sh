@@ -95,12 +95,15 @@ tool_info="${BIOR_ANNOTATE_DIR}/config/tool_info.txt"
 memory_info="${BIOR_ANNOTATE_DIR}/config/memory_info.txt"
 editLabel="bior\.\.|INFO\.|Info\.|bior\."
 
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
+
 ##################################################################################
 ###
 ###     Parse Argument variables
 ###
 ##################################################################################
-echo "Options specified: $@"
+log "Options specified: $@"
 
 while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
   case $OPTION in
@@ -127,10 +130,10 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
-    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
+    \?) log "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
-    :)  echo "Option -$OPTARG requires an argument. See output file for usage." >&2
+    :)  log "Option -$OPTARG requires an argument. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -151,17 +154,17 @@ fi
 if [ ! -s "$catalogs" -o ! -s "$drills" -o ! -s "$VCF" -o -z "$outname"  ]
 then
   usage
-	echo "A required input parameter does not exist or the file is empty. Please check for typos."
-	echo "CATALOGS=$catalogs"
-	echo "DRILLS=$drills"
-	echo "VCF=$VCF"
-	echo "outname=$outname"
+	log "A required input parameter does not exist or the file is empty. Please check for typos."
+	log "CATALOGS=$catalogs"
+	log "DRILLS=$drills"
+	log "VCF=$VCF"
+	log "outname=$outname"
 	exit
 fi
 
 if  [[ $outname == *"/"* ]]
 then 
-	echo "Please do not use a path for this variable!"
+	log "Please do not use a path for this variable!"
 	usage
 fi
 
@@ -170,10 +173,10 @@ if [ -z "$tool_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      echo "Informational message: You did not supply a tool_info file."
-    	echo "Using $tool_info" 
+      log "Informational message: You did not supply a tool_info file."
+    	log "Using $tool_info" 
 	else
-      echo "ERROR: A tool_info file is required when submitting to the grid."
+      log "ERROR: A tool_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -182,10 +185,10 @@ if [ -z "$memory_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      echo "Informational message: You did not supply a memory_info file."
-	echo "Using $memory_info"		
+      log "Informational message: You did not supply a memory_info file."
+	log "Using $memory_info"		
     else
-      echo "ERROR: A tool_info file is required when submitting to the grid."
+      log "ERROR: A tool_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -197,9 +200,9 @@ memory_info=`readlink -m ${memory_info}`
 #Makes sure files exist
 if [ ! -s "$tool_info" -o ! -s "$memory_info" ]
 then
-	echo "ERROR: Check the location of your tool and memory info files"
-	echo "tool_info=$tool_info"
-	echo "memory_info=$memory_info"
+	log "ERROR: Check the location of your tool and memory info files"
+	log "tool_info=$tool_info"
+	log "memory_info=$memory_info"
 	exit 100
 fi
 
@@ -222,7 +225,7 @@ source ${memory_info}
 # This variable should be defined in the tool_info file.
 if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
-  echo "ERROR: BIOR_ANNOTATE_DIR is not defined"
+  log "ERROR: BIOR_ANNOTATE_DIR is not defined"
   exit 100
 fi
 
@@ -271,7 +274,7 @@ cd $TEMPDIR
 EMAIL=`finger $USER|grep Name|cut -f4|$PERL -pne 's/(.*;)(.*)(;.*)/$2/'`
 if [ -z "${EMAIL}" ]
 then
-  echo "WARNING: ${USER} not found via finger."
+  log "WARNING: ${USER} not found via finger."
 fi
 
 
@@ -293,7 +296,7 @@ drills="$outdir/drills.tmp"
 VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $catalogs`
 if [ ! -z "$VALIDATE_CATALOG" ]
 then
-	echo ${VALIDATE_CATALOG} |$PERL -pne 's/L/\nL/g'
+	log ${VALIDATE_CATALOG} |$PERL -pne 's/L/\nL/g'
 	exit 100
 fi
 #Make sure the commands exist
@@ -303,9 +306,9 @@ do
 	CHECK=${BIOR}/${x}
 	if [ -z "$CHECK" ]
 	then
-		echo "##### ERROR ###############"
-		echo "Can't find the $x command"
-		echo "Check your BIOR setting in your tool info"
+		log "##### ERROR ###############"
+		log "Can't find the $x command"
+		log "Check your BIOR setting in your tool info"
 		exit 100
 	fi
 done
@@ -315,20 +318,20 @@ for x in $RES
 do
 	if [ ! -e "$x" ]
 	then
-		echo "##### ERROR ###############"
-		echo "Can't find the $x catalog"
-		echo "Check your $catalogs"
+		log "##### ERROR ###############"
+		log "Can't find the $x catalog"
+		log "Check your $catalogs"
 		exit 100
 	fi
 done
-echo "$catalogs is validated"
+log "$catalogs is validated"
 
 ##Validate drill file
 #Make sure there are 3 columns
 VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
 if [ ! -z "$VALIDATE_DRILL" ]
 then
-	echo $VALIDATE_DRILL |$PERL -pne 's/L/\nL/g'
+	log $VALIDATE_DRILL |$PERL -pne 's/L/\nL/g'
 	exit 100
 fi
 
@@ -365,28 +368,28 @@ do
 		#Remove the strings in the IDs that the user submits
 		for k in "${editLabelEvents[@]}"
 		do
-			trim=${trim/$k/}  #echo "TRIMMING trim=${trim/$k/}"
+			trim=${trim/$k/}  #log "TRIMMING trim=${trim/$k/}"
 		done
-		#echo "Checking $trim"
+		#log "Checking $trim"
 		#CHECK=`zcat $CATALOG|head -5000|grep -w ${trim}|head -1`
 		CHECK=`grep -w ${trim} ${CATALOG/tsv.bgz/}*columns.tsv`
 		PASS=`perl -pne 's/\t\n//' {CATALOG/tsv.bgz/}*columns.tsv|awk -F'\t' '(NF!=4 && $1 !~/^#/)'`
 		
 		if [ ! -z "$PASS" ]
 		then
-			echo "##### ERROR ###############"
-                        echo "Missing description in  $CATALOG"
-                        echo "Check your $catalogs"
-			echo "PASS = $PASS"
+			log "##### ERROR ###############"
+                        log "Missing description in  $CATALOG"
+                        log "Check your $catalogs"
+			log "PASS = $PASS"
                         exit 1
                 fi
 			
 		if [ -z "$CHECK" ]
 		then
-			echo "##### ERROR ###############"
-			echo "Can't find the ${trim} term in $CATALOG"
-			echo "Check your $catalogs"
-			echo "zcat $CATALOG|head -5000|grep -w ${trim}|head -1"
+			log "##### ERROR ###############"
+			log "Can't find the ${trim} term in $CATALOG"
+			log "Check your $catalogs"
+			log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1"
 			exit 1
 		fi
 	done
@@ -394,7 +397,7 @@ do
 done
 
 
-echo "All drill values are validated"
+log "All drill values are validated"
 
 ##################################################################################
 ###
@@ -440,14 +443,14 @@ else
 	cat $VCF|$PERL $VCF_SPLIT | grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
 fi
 
-#echo `ls $TEMPDIR/$CWD_VCF`
+#log `ls $TEMPDIR/$CWD_VCF`
 
 if [ "$CLINICAL" == "TRUE" ]
 then
 	#Split PEDIGREE and CWD_VCF to only contain the 3 target samples
 	PEDIGREE=${PEDIGREE##*p }
 	PEDIGREE=${PEDIGREE/ /}
-	echo "$PYTHON/python $SCRIPT_DIR/PEDsplit_AddGT.py $TEMPDIR/$CWD_VCF $PEDIGREE $PEDIGREE.3 $TEMPDIR/${CWD_VCF/.vcf/.trio.vcf} $tool_info"
+	log "$PYTHON/python $SCRIPT_DIR/PEDsplit_AddGT.py $TEMPDIR/$CWD_VCF $PEDIGREE $PEDIGREE.3 $TEMPDIR/${CWD_VCF/.vcf/.trio.vcf} $tool_info"
 	$PYTHON/python $SCRIPT_DIR/PEDsplit_AddGT.py $TEMPDIR/$CWD_VCF $PEDIGREE $PEDIGREE.3 $TEMPDIR/${CWD_VCF/.vcf/.trio.vcf} $tool_info
 	PEDIGREE="-p $PEDIGREE.3"
 	CWD_VCF=${CWD_VCF/.vcf/.trio.vcf}
@@ -457,7 +460,7 @@ fi
 cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "^#" >  ${CWD_VCF}.header
 if [ ! -s "${CWD_VCF}.header" ]
 then
-  echo "ERROR: failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
+  log "ERROR: failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
   exit 100
 fi
 
@@ -467,7 +470,7 @@ FIND_RESULTS=`find $TEMPDIR -maxdepth 1 -name "${CWD_VCF}[0-9]*" -print -quit`
 
 if [ -z "$FIND_RESULTS" ]
 then
-    echo "ERROR: VCF split appears to have failed. Please check $TEMPDIR to ensure that the VCF file ${CWD_VCF} is valid."
+    log "ERROR: VCF split appears to have failed. Please check $TEMPDIR to ensure that the VCF file ${CWD_VCF} is valid."
     exit 100
 fi
 
@@ -490,12 +493,12 @@ then
 	do
 
 		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
-    echo ""
-		echo $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
+    log ""
+		log $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
-  echo ""
- echo $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
+  log ""
+ log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
  cd $START_DIR
  if [[ "$log" != "TRUE"  ]]
@@ -513,17 +516,17 @@ do
   do
     if [[ "$WORKING_DIR" == "$LOCAL_DIR"* ]]
     then
-      echo "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
+      log "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
       exit 100
 # DEBUG ONLY
 #    else
-#      echo "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR"
+#      log "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR"
     fi
   done
 done
 
 # If you are at this point, then you will be submitting jobs to the sun grid engine
-#command -v $SGE_BASE/qsub >/dev/null 2>&1 || { echo >&2 "I require qsub but it's not installed.  Aborting.";exit 1}
+#command -v $SGE_BASE/qsub >/dev/null 2>&1 || { log >&2 "I require qsub but it's not installed.  Aborting.";exit 1}
 
 for x in ${CWD_VCF}[0-9][0-9][0-9]
 do
@@ -542,7 +545,7 @@ do
 	 
 	if [ "$log" == "TRUE" ]
 	then
-        echo "$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh $bior_annotate_params|cut -f3 -d ' ' >>jobs"
+        log "$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh $bior_annotate_params|cut -f3 -d ' ' >>jobs"
 	fi
 	if [ "$job_name" ]
 	then
@@ -564,7 +567,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	echo "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o $outdir/${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
+	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o $outdir/${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
 		LOG="-l"
 fi
 
@@ -580,8 +583,8 @@ else
 	command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 fi	
 eval "$command" 
-echo "You will be notified by e-mail as your jobs are processed. The baMerge job will be the last to complete."
-echo "** NOTE: when submitting to SGE, there will be multiple jobs created. You can monitor your jobs using qstat. **"
+log "You will be notified by e-mail as your jobs are processed. The baMerge job will be the last to complete."
+log "** NOTE: when submitting to SGE, there will be multiple jobs created. You can monitor your jobs using qstat. **"
 
 #Return to where you started
 if [ ! -z "$TEMPDIR" ]
