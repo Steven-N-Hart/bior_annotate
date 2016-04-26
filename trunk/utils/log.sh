@@ -82,3 +82,20 @@ log() {
     echo -e "$(date +%Y-%m-%d'T'%H:%M:%S%z) ${PREFIX} ${0-NA} ${SGE_TASK_ID-NA} ${ERROR_CODE-NA} ${MESSAGE}"
   fi
 }
+
+# Utility functions
+log_warning() {
+  MESSAGE=$1
+  WARNING_CODE=$2
+  LEVEL="warning"
+
+  log "$MESSAGE" "$LEVEL" "$WARNING_CODE"
+}
+
+log_error() {
+  MESSAGE=$1
+  ERROR_CODE=$2
+  LEVEL="warning"
+
+  log "$MESSAGE" "$LEVEL" "$ERROR_CODE"
+}
