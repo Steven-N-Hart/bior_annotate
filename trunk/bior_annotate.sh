@@ -130,10 +130,10 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
-    \?) log "Invalid option: -$OPTARG. See output file for usage." >&2
+    \?) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
-    :)  log "Option -$OPTARG requires an argument. See output file for usage." >&2
+    :)  log_error "Option -$OPTARG requires an argument. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -154,18 +154,19 @@ fi
 if [ ! -s "$catalogs" -o ! -s "$drills" -o ! -s "$VCF" -o -z "$outname"  ]
 then
   usage
-	log "A required input parameter does not exist or the file is empty. Please check for typos."
-	log "CATALOGS=$catalogs"
-	log "DRILLS=$drills"
-	log "VCF=$VCF"
-	log "outname=$outname"
-	exit
+  log_error "A required input parameter does not exist or the file is empty. Please check for typos."
+  log_error "CATALOGS=$catalogs"
+  log_error "DRILLS=$drills"
+  log_error "VCF=$VCF"
+  log_error "outname=$outname"
+  exit 100
 fi
 
 if  [[ $outname == *"/"* ]]
 then 
-	log "Please do not use a path for this variable!"
-	usage
+  log_error "Please do not use a path for this variable!"
+  usage
+  exit 100
 fi
 
 
@@ -173,10 +174,9 @@ if [ -z "$tool_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log "Informational message: You did not supply a tool_info file."
-    	log "Using $tool_info" 
-	else
-      log "ERROR: A tool_info file is required when submitting to the grid."
+      log_warning "No tool_info specified, using $tool_info"
+    else
+      log_error "A tool_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -185,10 +185,9 @@ if [ -z "$memory_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log "Informational message: You did not supply a memory_info file."
-	log "Using $memory_info"		
+      log_warning "No memory_info specified, using $memory_info"		
     else
-      log "ERROR: A tool_info file is required when submitting to the grid."
+      log_error "A memory_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -200,9 +199,9 @@ memory_info=`readlink -m ${memory_info}`
 #Makes sure files exist
 if [ ! -s "$tool_info" -o ! -s "$memory_info" ]
 then
-	log "ERROR: Check the location of your tool and memory info files"
-	log "tool_info=$tool_info"
-	log "memory_info=$memory_info"
+	log_error "Check the location of your tool and memory info files"
+	log_error "tool_info=$tool_info"
+	log_error "memory_info=$memory_info"
 	exit 100
 fi
 
@@ -216,8 +215,6 @@ Using the following configuration files for this run:
   Memory info:  $memory_info
 
 EOF
-exec 3>&2
-exec 2> /dev/null
 
 source ${tool_info}
 source ${memory_info}
@@ -225,7 +222,7 @@ source ${memory_info}
 # This variable should be defined in the tool_info file.
 if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
-  log "ERROR: BIOR_ANNOTATE_DIR is not defined"
+  log_error "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
   exit 100
 fi
 
@@ -274,7 +271,7 @@ cd $TEMPDIR
 EMAIL=`finger $USER|grep Name|cut -f4|$PERL -pne 's/(.*;)(.*)(;.*)/$2/'`
 if [ -z "${EMAIL}" ]
 then
-  log "WARNING: ${USER} not found via finger."
+  log_warning "${USER} not found via finger. You will not receive email notifications."
 fi
 
 
@@ -293,10 +290,10 @@ drills="$outdir/drills.tmp"
 
 ##Validate catalog file
 #Make sure there are 3 columns
-VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $catalogs`
+VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $catalogs`
 if [ ! -z "$VALIDATE_CATALOG" ]
 then
-	log ${VALIDATE_CATALOG} |$PERL -pne 's/L/\nL/g'
+	log_error "${VALIDATE_CATALOG}"
 	exit 100
 fi
 #Make sure the commands exist
@@ -306,9 +303,7 @@ do
 	CHECK=${BIOR}/${x}
 	if [ -z "$CHECK" ]
 	then
-		log "##### ERROR ###############"
-		log "Can't find the $x command"
-		log "Check your BIOR setting in your tool info"
+		log_error "Can't find the ${BIOR}/$x command as specified in $catalogs"
 		exit 100
 	fi
 done
@@ -318,20 +313,18 @@ for x in $RES
 do
 	if [ ! -e "$x" ]
 	then
-		log "##### ERROR ###############"
-		log "Can't find the $x catalog"
-		log "Check your $catalogs"
+		log_error "Can't find the $x catalog as specified in $catalogs"
 		exit 100
 	fi
 done
-log "$catalogs is validated"
+log "$catalogs is validated" "dev"
 
 ##Validate drill file
 #Make sure there are 3 columns
-VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME}}' $drills`
+VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $drills`
 if [ ! -z "$VALIDATE_DRILL" ]
 then
-	log $VALIDATE_DRILL |$PERL -pne 's/L/\nL/g'
+	log_error "$VALIDATE_DRILL"
 	exit 100
 fi
 
@@ -345,8 +338,8 @@ do
 
 	if [[ -z "$KEY" || -z "$TERMS" ]]
 	then
-    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $drills -m annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
-    exit 100
+          ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $drills -m bior_annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
+          exit 100
 	fi
 
 	CATALOG=`grep -w ^$KEY $catalogs |cut -f3|head -1`
@@ -354,8 +347,8 @@ do
 
 	if [[ -z "$CATALOG" || -z "$COMMAND" ]]
 	then
-    ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $catalogs -m annotate.sh -M "Unable to retrieve one of the catalog $CATALOG or command $COMMAND for key $KEY" -p $catalogs -l $LINENO
-    exit 100
+          ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $catalogs -m bior_annotate.sh -M "Unable to retrieve one of the catalog $CATALOG or command $COMMAND for key $KEY" -p $catalogs -l $LINENO
+          exit 100
 	fi
 
 	IFS=',' all_terms=( $TERMS )
@@ -373,31 +366,26 @@ do
 		#log "Checking $trim"
 		#CHECK=`zcat $CATALOG|head -5000|grep -w ${trim}|head -1`
 		CHECK=`grep -w ${trim} ${CATALOG/tsv.bgz/}*columns.tsv`
-		PASS=`perl -pne 's/\t\n//' {CATALOG/tsv.bgz/}*columns.tsv|awk -F'\t' '(NF!=4 && $1 !~/^#/)'`
+		PASS=`grep -v "#" ${CATALOG/tsv.bgz/}*columns.tsv | perl -pne 's/\t\n//' |awk -F'\t' '(NF<4 && $1 !~/^#/)'`
 		
 		if [ ! -z "$PASS" ]
 		then
-			log "##### ERROR ###############"
-                        log "Missing description in  $CATALOG"
-                        log "Check your $catalogs"
-			log "PASS = $PASS"
-                        exit 1
+			log_error "Missing description in ${CATALOG}. Suspect error in catalog.\nPASS=$PASS"
+                        exit 100
                 fi
 			
 		if [ -z "$CHECK" ]
 		then
-			log "##### ERROR ###############"
-			log "Can't find the ${trim} term in $CATALOG"
-			log "Check your $catalogs"
-			log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1"
-			exit 1
+			log_error "Can't find the ${trim} term in ${CATALOG}. Ensure you have specified the correct version in ${catalogs}."
+			log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1" "debug"
+			exit 100
 		fi
 	done
 	let NUM_ROWS-=1;
 done
 
 
-log "All drill values are validated"
+log "All drill values are validated" "dev"
 
 ##################################################################################
 ###
@@ -460,7 +448,7 @@ fi
 cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "^#" >  ${CWD_VCF}.header
 if [ ! -s "${CWD_VCF}.header" ]
 then
-  log "ERROR: failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
+  log_error "Failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
   exit 100
 fi
 
@@ -470,7 +458,7 @@ FIND_RESULTS=`find $TEMPDIR -maxdepth 1 -name "${CWD_VCF}[0-9]*" -print -quit`
 
 if [ -z "$FIND_RESULTS" ]
 then
-    log "ERROR: VCF split appears to have failed. Please check $TEMPDIR to ensure that the VCF file ${CWD_VCF} is valid."
+    log_error "VCF split appears to have failed. Please check $TEMPDIR to ensure that the VCF file ${CWD_VCF} is valid."
     exit 100
 fi
 
@@ -494,7 +482,7 @@ then
 
 		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
     log ""
-		log $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
+		log "$SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}" "dev"
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
@@ -516,11 +504,10 @@ do
   do
     if [[ "$WORKING_DIR" == "$LOCAL_DIR"* ]]
     then
-      log "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
+      log_error "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
       exit 100
-# DEBUG ONLY
-#    else
-#      log "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR"
+    else
+      log "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR" "debug"
     fi
   done
 done

@@ -114,7 +114,7 @@ call_bior_annotate() {
     exit 1
   fi
 
-  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -l -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
+  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
 
   log "Calling: $CMD" "debug"
   eval $CMD
