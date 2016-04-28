@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+
 # to check and validate the input bam file
 function validate_bam()	{
 	samtools=$1
@@ -140,4 +142,63 @@ function check_cm_variable()	{
 		echo "Must provide at least required options. See output file for usage."
 		exit 1;
 	fi
+}
+
+function validate_catalog_file() {
+  catalogs=$1
+  outdir=$2
+
+  if [ -z "$1" ]
+  then 
+    log_error "Must provide catalog file to validate_catalog_file"
+    exit 100
+  fi
+
+  if [ -z "$2" ]
+  then
+    log_error "Must provide output directory for temp files."
+    exit 100
+  fi
+
+  # Copy filtered version of drill and catalog files to $outdir and reassign variable.
+  grep -v "^#" $catalogs > $outdir/catalog.tmp
+  catalogs="$outdir/catalog.tmp"
+
+  ##Validate catalog file
+  #Make sure there are 3 columns
+  VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $catalogs`
+  if [ ! -z "$VALIDATE_CATALOG" ]
+  then
+    log_error "${VALIDATE_CATALOG}"
+    exit 100
+  fi
+
+  #Make sure the commands exist
+  RES=`cut -f2 $catalogs |sort -u`
+  for x in $RES
+  do
+    CHECK=${BIOR}/${x}
+    if [ -z "$CHECK" ]
+    then
+      log_error "Can't find the ${BIOR}/$x command as specified in $catalogs"
+      exit 100
+    fi
+  done
+
+  echo "All commands found"
+  #Make sure the catalogs exist
+  RES=`cut -f3 $catalogs |sort -u`
+  for x in $RES
+  do
+    if [ ! -e "$x" ]
+    then
+      log_error "Can't find the $x catalog as specified in $catalogs"
+      exit 100
+    fi
+  done
+  echo "$catalogs is validated" "dev"
+}
+
+function validate_drill_file() {
+  echo "Not implemented"
 }	

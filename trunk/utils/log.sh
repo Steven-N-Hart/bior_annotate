@@ -70,7 +70,7 @@ log() {
         PRINT_MESSAGE="true"
       fi
       ;;
-    "warn")
+    "warning")
       PRINT_MESSAGE="true"
       PREFIX="WARNING"
       ;;
@@ -95,7 +95,7 @@ log_warning() {
 log_error() {
   MESSAGE=$1
   ERROR_CODE=$2
-  LEVEL="warning"
+  LEVEL="error"
 
   log "$MESSAGE" "$LEVEL" "$ERROR_CODE"
 }

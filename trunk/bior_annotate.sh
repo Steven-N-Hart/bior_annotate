@@ -282,42 +282,44 @@ fi
 ##################################################################################
 
 # Copy filtered version of drill and catalog files to $outdir and reassign variable.
-grep -v "^#" $catalogs > $outdir/catalog.tmp
-catalogs="$outdir/catalog.tmp"
+##grep -v "^#" $catalogs > $outdir/catalog.tmp
+#catalogs="$outdir/catalog.tmp"
+#
+validate_catalog_file $catalogs $outdir
 
 grep -v "^#" $drills > $outdir/drills.tmp
 drills="$outdir/drills.tmp"
-
-##Validate catalog file
-#Make sure there are 3 columns
-VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $catalogs`
-if [ ! -z "$VALIDATE_CATALOG" ]
-then
-	log_error "${VALIDATE_CATALOG}"
-	exit 100
-fi
-#Make sure the commands exist
-RES=`cut -f2 $catalogs |sort -u`
-for x in $RES
-do
-	CHECK=${BIOR}/${x}
-	if [ -z "$CHECK" ]
-	then
-		log_error "Can't find the ${BIOR}/$x command as specified in $catalogs"
-		exit 100
-	fi
-done
-#Make sure the catalogs exist
-RES=`cut -f3 $catalogs |sort -u`
-for x in $RES
-do
-	if [ ! -e "$x" ]
-	then
-		log_error "Can't find the $x catalog as specified in $catalogs"
-		exit 100
-	fi
-done
-log "$catalogs is validated" "dev"
+#
+###Validate catalog file
+##Make sure there are 3 columns
+#VALIDATE_CATALOG=`awk '{if (NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $catalogs`
+#if [ ! -z "$VALIDATE_CATALOG" ]
+#then
+#	log_error "${VALIDATE_CATALOG}"
+#	exit 100
+#fi
+##Make sure the commands exist
+#RES=`cut -f2 $catalogs |sort -u`
+#for x in $RES
+#do
+#	CHECK=${BIOR}/${x}
+#	if [ -z "$CHECK" ]
+#	then
+#		log_error "Can't find the ${BIOR}/$x command as specified in $catalogs"
+#		exit 100
+#	fi
+#done
+##Make sure the catalogs exist
+#RES=`cut -f3 $catalogs |sort -u`
+#for x in $RES
+#do
+#	if [ ! -e "$x" ]
+#	then
+#		log_error "Can't find the $x catalog as specified in $catalogs"
+#		exit 100
+#	fi
+#done
+#log "$catalogs is validated" "dev"
 
 ##Validate drill file
 #Make sure there are 3 columns
