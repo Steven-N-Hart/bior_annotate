@@ -1,0 +1,14 @@
+This list tracks work items, owner (if assigned), and creator (for contact)
+Items are tab-separated.
+
+ITEM_ID	STATUS	REQUEST_TYPE	CREATOR	OWNER	DESCRIPTION
+00001	working	enhancement	Kalmbach	Kalmbach	Convert echo statements to log statements at appropriate level
+00002	working	enhancement	Kalmbach	Kalmbach	Examine error paths where we exit 100 and give helpful error messages
+00003	open	enhancement	Kalmbach	Kalmbach	Ensure that an email is sent for every exit 100
+00004	open	documentation	Kalmbach	Kalmbach	Update github README to describe installation prereqs
+00005	open	documentation	Kalmbach	Kalmbach	Update internal bsiweb bior_annotate web page
+00006	open	enhancement	Kalmbach	Kalmbach	Create help text for ba.merge.sh
+00007	open	test	Kalmbach	Kalmbach	Test suite for validating drill_file and providing helpful errors
+00008	open	test	Kalmbach	Kalmbach	Test suite for validating catalog_file and providing helpful errors
+00009	open	test	Kalmbach	Kalmbach	Test suite for good path queue submission
+00010	open	test	Kalmbach	Kalmbach	Add VCF verification to utility functions and test validation
