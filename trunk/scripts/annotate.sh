@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
 
 usage() {
 cat << EOF
@@ -9,6 +10,7 @@ cat << EOF
 ##      -c    path to catalog file
 ##      -d    Path to the drill file
 ##      -h    Display this help text
+##      -l    Enable full log tracing
 ##      -T    tool info file from GGPS
 ##      -v    path to the VCF to annotate
 ## 
@@ -19,22 +21,25 @@ cat << EOF
 EOF
 }
 
+log="FALSE"
+
 ##################################################################################
 ###
 ###     Parse Argument variables
 ###
 ##################################################################################
-echo "Options specified: $@"
+log_debug "Options specified: $@"
 
-while getopts "c:d:hT:v:" OPTION; do
+while getopts "c:d:hlT:v:" OPTION; do
   case $OPTION in
     c)  catalogs=$OPTARG ;;     #
     d)  drills=$OPTARG ;;       #
     h)  usage                   #
         exit ;;
+    l)  log="TRUE" ;;
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
-    *) echo "Invalid option: -$OPTARG. See output file for usage." >&2
+    *) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -47,7 +52,7 @@ fi
 
 if [ -z "$tool_info" ]
 then
-  echo "ERROR: A tool_info file is required for annotate.sh."
+  log_error "A tool_info file is required for annotate.sh."
   exit 100
 fi
 
@@ -55,7 +60,6 @@ source $tool_info
 source $BIOR_PROFILE
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
 
-set -x
 CWD_VCF=`basename $VCF`
 DRILL_FILE=$drills
 CATALOG_FILE=$catalogs
@@ -73,21 +77,23 @@ do
   separator=" -p "
   drill_opts="$( printf "${separator}%s" "${all_terms[@]}" )"
 
+  # TODO: can this be replaced by catalog validation function?
   if [ -z "$CATALOG" ]
   then
-    echo "Error parsing CATALOG. Command used: grep -w \"$SHORT_NAME\" $CATALOG_FILE|cut -f3|head -1"
+    log_error "Error parsing CATALOG. Command used: grep -w \"$SHORT_NAME\" $CATALOG_FILE|cut -f3|head -1"
     exit 100
   fi
 
   if [ -z "$CATALOG_COMMAND" ]
   then
-    echo "Error parsing CATALOG_COMMAND. Command used: grep -w \"$SHORT_NAME\" $CATALOG_FILE|cut -f2|head -1"
+    log_error "Error parsing CATALOG_COMMAND. Command used: grep -w \"$SHORT_NAME\" $CATALOG_FILE|cut -f2|head -1"
     exit 100
   fi
 
+  # TODO: can this be replaced by file_validation utitity?
   if [ ! -s "$VCF" ]
   then
-    echo "$VCF not found. Previous step appears to have failed."
+    log_error "$VCF not found. Previous step appears to have failed."
     exit 100
   fi
 
