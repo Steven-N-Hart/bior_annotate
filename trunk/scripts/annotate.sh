@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
 
 usage() {
 cat << EOF
@@ -28,8 +27,6 @@ log="FALSE"
 ###     Parse Argument variables
 ###
 ##################################################################################
-log_debug "Options specified: $@"
-
 while getopts "c:d:hlT:v:" OPTION; do
   case $OPTION in
     c)  catalogs=$OPTARG ;;     #
@@ -52,13 +49,15 @@ fi
 
 if [ -z "$tool_info" ]
 then
-  log_error "A tool_info file is required for annotate.sh."
+  echo "A tool_info file is required for annotate.sh."
   exit 100
 fi
 
 source $tool_info
 source $BIOR_PROFILE
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+log_debug "Options specified: $@"
 
 CWD_VCF=`basename $VCF`
 DRILL_FILE=$drills
