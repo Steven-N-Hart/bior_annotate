@@ -199,6 +199,81 @@ function validate_catalog_file() {
   echo "$catalogs is validated" "dev"
 }
 
+# Assumptions:
+#   Location of catalog file is: $outdir/catalog.tmp
 function validate_drill_file() {
-  echo "Not implemented"
+  drills=$1
+  outdir=$2
+
+  catalogs=$outdir/catalog.tmp
+
+  grep -v "^#" $drills > $outdir/drills.tmp
+  drills="$outdir/drills.tmp"
+
+  ##Validate drill file
+  #Make sure there are 3 columns
+  VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $drills`
+  if [ ! -z "$VALIDATE_DRILL" ]
+  then
+    log_error "$VALIDATE_DRILL"
+    exit 100
+  fi
+
+  #Make sure the drill values exist in the catalog and are formatted properly
+  NUM_ROWS=`awk 'END{print NR }' $drills`
+  while [ $NUM_ROWS -gt 0 ];
+  do
+    x=$NUM_ROWS
+    KEY=$(awk -v var=$x '(NR==var){print $1}' $drills)
+    TERMS=$(awk -v var=$x '(NR==var){print $2}' $drills)
+
+    if [[ -z "$KEY" || -z "$TERMS" ]]
+    then
+      ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $drills -m bior_annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
+      exit 100
+    fi
+
+    CATALOG=`grep -w ^$KEY $catalogs |cut -f3|head -1`
+    COMMAND=`grep -w ^$KEY $catalogs |cut -f2|head -1`
+
+    if [[ -z "$CATALOG" || -z "$COMMAND" ]]
+    then
+      ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $catalogs -m bior_annotate.sh -M "Unable to retrieve one of the catalog $CATALOG or command $COMMAND for key $KEY" -p $catalogs -l $LINENO
+      exit 100
+    fi
+
+    IFS=',' all_terms=( $TERMS )
+    for i in "${all_terms[@]}"
+    do
+      CHECK=""
+      #Remove any trace of clipped terms
+      IFS='|' editLabelEvents=( $editLabel )
+      trim=$i
+      #Remove the strings in the IDs that the user submits
+      for k in "${editLabelEvents[@]}"
+      do
+        trim=${trim/$k/}  #log "TRIMMING trim=${trim/$k/}"
+      done
+
+      CHECK=`grep -w ${trim} ${CATALOG/tsv.bgz/}*columns.tsv`
+      PASS=`grep -v "#" ${CATALOG/tsv.bgz/}*columns.tsv | perl -pne 's/\t\n//' |awk -F'\t' '(NF<4 && $1 !~/^#/)'`
+
+      if [ ! -z "$PASS" ]
+      then
+        log_error "Missing description in ${CATALOG}. Suspect error in catalog.\nPASS=$PASS"
+        exit 100
+      fi
+
+      if [ -z "$CHECK" ]
+      then
+        log_error "Can't find the ${trim} term in ${CATALOG}. Ensure you have specified the correct version in ${catalogs}."
+        log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1" "debug"
+        exit 100
+      fi
+    done
+    let NUM_ROWS-=1;
+  done
+
+  log "All drill values are validated" 
+
 }	
