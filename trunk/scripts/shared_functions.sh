@@ -196,7 +196,7 @@ function validate_catalog_file() {
       exit 100
     fi
   done
-  echo "$catalogs is validated" "dev"
+  log_dev "$catalogs is validated" 
 }
 
 # Assumptions:
@@ -267,7 +267,7 @@ function validate_drill_file() {
       if [ -z "$CHECK" ]
       then
         log_error "Can't find the ${trim} term in ${CATALOG}. Ensure you have specified the correct version in ${catalogs}."
-        log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1" "debug"
+        log_debug "zcat $CATALOG|head -5000|grep -w ${trim}|head -1" 
         exit 100
       fi
     done

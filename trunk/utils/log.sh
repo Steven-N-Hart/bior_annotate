@@ -83,6 +83,20 @@ log() {
   fi
 }
 
+log_dev() {
+  MESSAGE=$1
+  LEVEL="dev"
+  
+  log "$MESSAGE" "$LEVEL"
+}
+
+log_debug() {
+  MESSAGE=$1
+  LEVEL="debug"
+
+  log "$MESSAGE" "$LEVEL"
+}
+
 # Utility functions
 log_warning() {
   MESSAGE=$1

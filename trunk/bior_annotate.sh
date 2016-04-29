@@ -281,84 +281,9 @@ fi
 ###
 ##################################################################################
 
-# Copy filtered version of drill and catalog files to $outdir and reassign variable.
-##grep -v "^#" $catalogs > $outdir/catalog.tmp
-#catalogs="$outdir/catalog.tmp"
-#
 validate_catalog_file $catalogs $outdir
 
 validate_drill_file $drills $outdir
-#
-#grep -v "^#" $drills > $outdir/drills.tmp
-#drills="$outdir/drills.tmp"
-#
-###Validate drill file
-##Make sure there are 3 columns
-#VALIDATE_DRILL=`awk '{if (NF != 2 && NF != 3){print "Line number",NR,"is incorrectly formatted in ",FILENAME,"\\\n"}}' $drills`
-#if [ ! -z "$VALIDATE_DRILL" ]
-#then
-#	log_error "$VALIDATE_DRILL"
-#	exit 100
-#fi
-#
-##Make sure the drill values exist in the catalog and are formatted properly
-#NUM_ROWS=`awk 'END{print NR }' $drills`
-#while [ $NUM_ROWS -gt 0 ];
-#do
-#	x=$NUM_ROWS
-#	KEY=$(awk -v var=$x '(NR==var){print $1}' $drills)
-#	TERMS=$(awk -v var=$x '(NR==var){print $2}' $drills)
-#
-#	if [[ -z "$KEY" || -z "$TERMS" ]]
-#	then
-#          ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $drills -m bior_annotate.sh -M "Unable to retrieve drill name or terms" -p $drills -l $LINENO
-#          exit 100
-#	fi
-#
-#	CATALOG=`grep -w ^$KEY $catalogs |cut -f3|head -1`
-#	COMMAND=`grep -w ^$KEY $catalogs |cut -f2|head -1`
-#
-#	if [[ -z "$CATALOG" || -z "$COMMAND" ]]
-#	then
-#          ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $catalogs -m bior_annotate.sh -M "Unable to retrieve one of the catalog $CATALOG or command $COMMAND for key $KEY" -p $catalogs -l $LINENO
-#          exit 100
-#	fi
-#
-#	IFS=',' all_terms=( $TERMS )
-#	for i in "${all_terms[@]}"
-#	do
-#		CHECK=""
-#		#Remove any trace of clipped terms
-#		IFS='|' editLabelEvents=( $editLabel )
-#		trim=$i
-#		#Remove the strings in the IDs that the user submits
-#		for k in "${editLabelEvents[@]}"
-#		do
-#			trim=${trim/$k/}  #log "TRIMMING trim=${trim/$k/}"
-#		done
-#		#log "Checking $trim"
-#		#CHECK=`zcat $CATALOG|head -5000|grep -w ${trim}|head -1`
-#		CHECK=`grep -w ${trim} ${CATALOG/tsv.bgz/}*columns.tsv`
-#		PASS=`grep -v "#" ${CATALOG/tsv.bgz/}*columns.tsv | perl -pne 's/\t\n//' |awk -F'\t' '(NF<4 && $1 !~/^#/)'`
-#		
-#		if [ ! -z "$PASS" ]
-#		then
-#			log_error "Missing description in ${CATALOG}. Suspect error in catalog.\nPASS=$PASS"
-#                        exit 100
-#                fi
-#			
-#		if [ -z "$CHECK" ]
-#		then
-#			log_error "Can't find the ${trim} term in ${CATALOG}. Ensure you have specified the correct version in ${catalogs}."
-#			log "zcat $CATALOG|head -5000|grep -w ${trim}|head -1" "debug"
-#			exit 100
-#		fi
-#	done
-#	let NUM_ROWS-=1;
-#done
-#
-#
-#log "All drill values are validated" "dev"
 
 ##################################################################################
 ###
@@ -455,7 +380,7 @@ then
 
 		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
     log ""
-		log "$SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}" "dev"
+		log_dev "$SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}" 
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
@@ -480,7 +405,7 @@ do
       log_error "$LOCAL_DIR is a local filesystem that is not available on the grid nodes. Please modify your job settings and try again."
       exit 100
     else
-      log "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR" "debug"
+      log_debug "WORKING_DIR=$WORKING_DIR, LOCAL_DIR=$LOCAL_DIR" 
     fi
   done
 done
