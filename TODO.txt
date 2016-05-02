@@ -17,3 +17,4 @@ ITEM_ID	STATUS	REQUEST_TYPE	CREATOR	OWNER	DESCRIPTION
 00013	open	enhancement	Kalmbach	Kalmbach	Ensure that error log output goes to stderr
 00014	open	test	Kalmbach	Kalmbach	Add test for SNPEff
 00015	open	test	Kalmbach	Kalmbach	Add test for CAVA
+00016	open	refactor	Kalmbach	Kalmbach	Use consistent spacing among all files (spaces/tabs)
