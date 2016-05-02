@@ -13,3 +13,7 @@ ITEM_ID	STATUS	REQUEST_TYPE	CREATOR	OWNER	DESCRIPTION
 00009	open	test	Kalmbach	Kalmbach	Test suite for good path queue submission
 00010	open	test	Kalmbach	Kalmbach	Add VCF verification to utility functions and test validation
 00011	open	documentation	Kalmbach	Kalmbach	Update help text to describe renamed columns functionality
+00012	open	documentation	Kalmbach	Kalmbach	Ensure each script has detailed help text
+00013	open	enhancement	Kalmbach	Kalmbach	Ensure that error log output goes to stderr
+00014	open	test	Kalmbach	Kalmbach	Add test for SNPEff
+00015	open	test	Kalmbach	Kalmbach	Add test for CAVA
