@@ -11,8 +11,8 @@ function validate_bam()	{
 	rand1=$RANDOM
 	if [ ! -s $2 ]
 	then
-		echo -e "$bamfile : doesn't exist"
-		exit 1;
+		log_error "$bamfile : doesn't exist"
+		exit 100;
 	fi	
 	bam_name=`basename $bamfile_1`
 	if [ "$SGE_TASK_ID" ]
@@ -24,10 +24,8 @@ function validate_bam()	{
 	$samtools/samtools view -H $bamfile_1 1>$dir/$bam_name.$tag.header 2> $dir/$bam_name.$tag.log
 	if [[ `cat $dir/$bam_name.$tag.log | wc -l` -gt 0 || `cat $dir/$bam_name.$tag.header | wc -l` -le 0 ]]
 	then
-		echo -e "\n************************************"
-		echo -e "ERROR : $bamfile_1 file is truncated or corrupted [`date`]"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$bamfile_1 file is truncated or corrupted [`date`]"
+		exit 100;
 	else
 		rm $dir/$bam_name.$tag.log
 	fi	
@@ -39,20 +37,16 @@ function check_variable()	{
 	message=$1
 	if [[ "$2" == "" ]] 
 	then 
-		echo -e "\n************************************"
-		echo "$message is not set correctly."
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$message is not set correctly."
+		exit 100;
 	fi		
 }	
 
 function check_file()	{
 	if [[ ! -s $1 ]] 
 	then 
-		echo -e "\n************************************"
-		echo "$1 doesn't exist or it is empty"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$1 doesn't exist or it is empty"
+		exit 100;
 	fi		
 }
 
@@ -69,10 +63,8 @@ function check_dir()	{
 	message=$1
 	if [ $2 == "." ]
 	then
-		echo -e "\n************************************"
-		echo -e "$message : should be specified as complete path"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$message : should be specified as complete path"
+		exit 100;
 	fi	
 }
 			
@@ -81,19 +73,15 @@ function check_config()	{
 	message=$1
 	if [ ! -s $2 ]
 	then
-		echo -e "\n************************************"
-		echo -e "$message : doesn't exist"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$message : doesn't exist"
+		exit 100;
 	fi	
 	
 	dir_info=`dirname $2`
 	if [ $dir_info == "." ]
 	then
-		echo -e "\n************************************"
-		echo -e "$message : should be specified as complete path ($dir_info)"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$message : should be specified as complete path ($dir_info)"
+		exit 100;
 	fi
 		
 	du=`dos2unix $2 2>&1` 
