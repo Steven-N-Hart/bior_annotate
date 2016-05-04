@@ -96,10 +96,8 @@ function check_capturekit()	{
 	do
 		if [ `cat $capturekit | grep -w chr$i | wc -l` -le 0  ]
 		then
-			echo -e "\n************************************"
-			echo -e "no chromosomal region in the capture bed file, \nplease remove the chromosome : chr$i from CHRINDEX tag from runinfo file"
-			echo -e "\n************************************"
-			exit 1;
+			log_error "no chromosomal region in the capture bed file, \nplease remove the chromosome : chr$i from CHRINDEX tag from runinfo file"
+			exit 100;
 		fi
 	done	
 }
@@ -107,28 +105,24 @@ function check_capturekit()	{
 function check_dir_exist()	{
 	if [ ! -d $1 ]
 	then
-		echo -e "\n************************************"
-		echo -e "$1 : folder doesn't exist"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$1 : folder doesn't exist"
+		exit 100;
 	fi	
 }	
 
 function check_file_nonexist()	{
 	if [ -f $1 ]
 	then
-		echo -e "\n************************************"
-		echo -e "$1 : file already exist"
-		echo -e "\n************************************"
-		exit 1;
+		log_error "$1 : file already exist"
+		exit 100;
 	fi	
 }	
 
 function check_cm_variable()	{
 	if [ -z $1 ]
 	then
-		echo "Must provide at least required options. See output file for usage."
-		exit 1;
+		log_error "Must provide at least required options. See output file for usage."
+		exit 100;
 	fi
 }
 
@@ -173,7 +167,7 @@ function validate_catalog_file() {
     fi
   done
 
-  echo "All commands found"
+  log "All commands found"
   #Make sure the catalogs exist
   RES=`cut -f3 $catalogs |sort -u`
   for x in $RES
