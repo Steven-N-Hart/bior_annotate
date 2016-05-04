@@ -167,7 +167,7 @@ then
 
   ## TODO: Why is this here? Did this functionality move?
   #cat drill.table
-  echo "#######################################################"
+  log "#######################################################"
   #$PERL $INFO_PARSE $CWD_VCF -q "${DRILLS}" |grep -v "^##"|perl -pne 's/$editLabel//g' > $CWD_VCF.xls
 fi    
 #Final files $CWD_VCF & possibly $CWD_VCF.savant.xls
