@@ -55,8 +55,10 @@ fi
 
 source $tool_info
 source $BIOR_PROFILE
-source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${DIR}/shared_functions.sh"
+source "${DIR}/../utils/log.sh"
+
 log_debug "Options specified: $@"
 
 CWD_VCF=`basename $VCF`

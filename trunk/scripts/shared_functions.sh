@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
-
+#source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "${DIR}/../utils/log.sh"
 # to check and validate the input bam file
 function validate_bam()	{
 	samtools=$1

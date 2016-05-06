@@ -35,8 +35,8 @@ while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
 done
 
 source $tool_info
-source ${DIR}/shared_functions.sh
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+source "${DIR}/shared_functions.sh"
+source "${DIR}/../utils/log.sh"
 
 if [ ! -z "$LOG" ] 
 then 
