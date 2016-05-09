@@ -118,8 +118,16 @@ call_bior_annotate() {
 
   log "Calling: $CMD" "debug"
   eval $CMD
-  
 
+  if [ "$QUEUE" != "NA" ]
+  then  
+    while [ ! -z "`qstat -q $QUEUE | grep AUTO_TEST`" ]
+    do
+      log "Not found yet"
+      log_debug "`qstat -q $QUEUE`"
+      sleep 10
+    done
+  fi
 }
 
 # Function: 

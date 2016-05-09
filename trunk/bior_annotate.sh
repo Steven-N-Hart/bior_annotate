@@ -95,15 +95,12 @@ tool_info="${BIOR_ANNOTATE_DIR}/config/tool_info.txt"
 memory_info="${BIOR_ANNOTATE_DIR}/config/memory_info.txt"
 editLabel="bior\.\.|INFO\.|Info\.|bior\."
 
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
-source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
-
 ##################################################################################
 ###
 ###     Parse Argument variables
 ###
 ##################################################################################
-log "Options specified: $@"
+echo "Options specified: $@"
 
 while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
   case $OPTION in
@@ -130,10 +127,10 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
-    \?) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
+    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
-    :)  log_error "Option -$OPTARG requires an argument. See output file for usage." >&2
+    :)  echo "Option -$OPTARG requires an argument. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -154,18 +151,18 @@ fi
 if [ ! -s "$catalogs" -o ! -s "$drills" -o ! -s "$VCF" -o -z "$outname"  ]
 then
   usage
-  log_error "A required input parameter does not exist or the file is empty. Please check for typos."
-  log_error "CATALOGS=$catalogs"
-  log_error "DRILLS=$drills"
-  log_error "VCF=$VCF"
-  log_error "outname=$outname"
+  echo "A required input parameter does not exist or the file is empty. Please check for typos."
+  echo "CATALOGS=$catalogs"
+  echo "DRILLS=$drills"
+  echo "VCF=$VCF"
+  echo "outname=$outname"
   exit 100
 fi
 
 if  [[ $outname == *"/"* ]]
-then 
-  log_error "Please do not use a path for this variable!"
-  usage
+then
+  usage 
+  echo "Please do not use a path for the output file name."
   exit 100
 fi
 
@@ -174,9 +171,9 @@ if [ -z "$tool_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log_warning "No tool_info specified, using $tool_info"
+      echo "No tool_info specified, using $tool_info"
     else
-      log_error "A tool_info file is required when submitting to the grid."
+      echo "A tool_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -185,9 +182,9 @@ if [ -z "$memory_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log_warning "No memory_info specified, using $memory_info"		
+      echo "No memory_info specified, using $memory_info"		
     else
-      log_error "A memory_info file is required when submitting to the grid."
+      echo "A memory_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -199,9 +196,9 @@ memory_info=`readlink -m ${memory_info}`
 #Makes sure files exist
 if [ ! -s "$tool_info" -o ! -s "$memory_info" ]
 then
-	log_error "Check the location of your tool and memory info files"
-	log_error "tool_info=$tool_info"
-	log_error "memory_info=$memory_info"
+	echo "Check the location of your tool and memory info files"
+	echo "tool_info=$tool_info"
+	echo "memory_info=$memory_info"
 	exit 100
 fi
 
@@ -222,10 +219,14 @@ source ${memory_info}
 # This variable should be defined in the tool_info file.
 if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
-  log_error "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
+  echo "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
   exit 100
+else
+  echo "BIOR_ANNOTATE_DIR=$BIOR_ANNOTATE_DIR"
 fi
 
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
 
 
@@ -419,12 +420,12 @@ do
 	then
 		if [ "$job_suffix" ]
 		then
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix annotate.sh $x"
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 		else
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf annotate.sh $x"
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 		fi
 	else
-		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf annotate.sh $x"
+		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 	fi	
 	JOB1=`eval "$command" |cut -f3 -d ' ' `
 	 
