@@ -32,7 +32,6 @@ while getopts "D:g:p:M:v:sT:d:t:l:j:hLc" OPTION; do
        exit ;;
   esac
 done
-
 if [ -z "$tool_info" ]
 then
 	echo "ERROR: The tool info file is a required parameter."
@@ -40,8 +39,10 @@ then
 fi
 source "$tool_info"
 source "$MEM_INFO"
-source ${DIR}/shared_functions.sh
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+source "${DIR}/shared_functions.sh"
+source "${DIR}/../utils/log.sh"
+
+#source ${BIOR_ANNOTATE_DIR}/utils/log.sh
 if [[ -z "$CWD_VCF" || ! -e "$CWD_VCF" || ! -s "$CWD_VCF" ]]
 then
    ${DIR}/email.sh -f \$CWD_VCF -m ba.program.sh -M "VCF file does not exist" -p \$VCF -l \$LINENO
