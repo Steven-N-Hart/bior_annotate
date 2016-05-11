@@ -101,15 +101,17 @@ then
 	log_error "ERROR! Compression failed - only found $FINAL variants, expected $BEGINNING"
 	exit 100
 fi
+
 rm ${outname}.vcf
 # $TABIX/bgzip -f ${outname}.vcf
 $TABIX/tabix -f -p vcf ${outname}.vcf.gz
 
-#mv ${outname}.vcf.gz ../
+mv ${outname}.vcf.gz* ${outname}.xls ../
 
 #Clean up
 if [[ -z "$LOG" && ! -z "$CREATE_DIR" ]]
 then
-  rm -r "$CREATE_DIR/"
+  log_debug "CREATE_DIR=$CREATE_DIR"
+  rm -r "$CREATE_DIR/.bior*"
 fi
 
