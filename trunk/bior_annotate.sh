@@ -478,4 +478,3 @@ then
 	cd $START_DIR
 fi
 
-rm $catalogs $drills

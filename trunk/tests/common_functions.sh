@@ -123,9 +123,17 @@ call_bior_annotate() {
   then  
     while [ ! -z "`qstat -q $QUEUE | grep AUTO_TEST`" ]
     do
-      log "Not found yet"
-      log_debug "`qstat -q $QUEUE`"
-      sleep 10
+      NUM_JOBS=`qstat -q $QUEUE | grep AUTO_TEST | wc -l`
+      ERROR_JOBS=`qstat -q $QUEUE | grep Eqw | wc -l`
+      if [[ -z "$ERROR_JOBS" || "$ERROR_JOBS" == "0" ]]
+      then
+        log "Still running: $NUM_JOBS jobs remain in the queue"
+      else
+        log "Detected a job in the error state. Exiting."
+        log_debug "`qstat -q $QUEUE`"
+	exit 1
+      fi
+      sleep 20
     done
   fi
 }

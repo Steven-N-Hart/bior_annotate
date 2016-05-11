@@ -36,7 +36,7 @@ while getopts "c:d:hlT:v:" OPTION; do
     l)  log="TRUE" ;;
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
-    *) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
+    *) echo "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -55,9 +55,8 @@ fi
 
 source $tool_info
 source $BIOR_PROFILE
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/shared_functions.sh"
-source "${DIR}/../utils/log.sh"
+source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
+source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
 
 log_debug "Options specified: $@"
 
