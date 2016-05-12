@@ -269,8 +269,6 @@ if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
   echo "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
   exit 100
-else
-  echo "BIOR_ANNOTATE_DIR=$BIOR_ANNOTATE_DIR"
 fi
 
 source ${BIOR_ANNOTATE_DIR}/utils/log.sh
