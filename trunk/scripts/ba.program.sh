@@ -7,7 +7,7 @@
 echo ""
 echo "Running ba.program"
 echo "Options specified: $@"| tr "-" "\n"
-while getopts "D:g:p:M:v:sT:d:t:l:j:hLc" OPTION; do
+while getopts "D:g:p:M:v:sT:d:t:l:j:hLcC:" OPTION; do
   case $OPTION in
     h) echo "Read the instructions"
         exit ;;
@@ -23,6 +23,7 @@ while getopts "D:g:p:M:v:sT:d:t:l:j:hLc" OPTION; do
     g) GENE_LIST=$OPTARG ;;
     L) LINKOFF="TRUE" ;;
     M) MEM_INFO=$OPTARG ;;
+	C) CREATE_DIR=$OPTARG ;;
 	D) DIR=$OPTARG ;;
    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
        usage
@@ -39,10 +40,10 @@ then
 fi
 source "$tool_info"
 source "$MEM_INFO"
-source "${DIR}/shared_functions.sh"
-source "${DIR}/../utils/log.sh"
+source "$BIOR_PROFILE"
+source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
+source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
 
-#source ${BIOR_ANNOTATE_DIR}/utils/log.sh
 if [[ -z "$CWD_VCF" || ! -e "$CWD_VCF" || ! -s "$CWD_VCF" ]]
 then
    ${DIR}/email.sh -f \$CWD_VCF -m ba.program.sh -M "VCF file does not exist" -p \$VCF -l \$LINENO
@@ -52,14 +53,13 @@ fi
 export PYTHONPATH=$PYTHON:$PYTHONLIB
 export PERL5LIB=$PERLLIB:$PERL5LIB
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-SNPEFF_PARSE=$DIR/SNPeff_parse.pl
-SAVANT_PARSE=$DIR/savant.label.pl
-CAVA_PARSE=$DIR/cava.parse.pl 
-INHERITANCE=$DIR/Inheritance.pl
-COMPOUNDHET=$DIR/CompoundHet.pl
-LINKS=$DIR/AddLinksToVCF.pl
-TRIM=$DIR/VCF_remove.pl
-#JAVA_HOME=/usr/local/biotools/java/jdk1.7.0_03
+SNPEFF_PARSE=${BIOR_ANNOTATE_DIR}/scripts/SNPeff_parse.pl
+SAVANT_PARSE=${BIOR_ANNOTATE_DIR}/scripts/savant.label.pl
+CAVA_PARSE=${BIOR_ANNOTATE_DIR}/scripts/cava.parse.pl 
+INHERITANCE=${BIOR_ANNOTATE_DIR}/scripts/Inheritance.pl
+COMPOUNDHET=${BIOR_ANNOTATE_DIR}/scripts/CompoundHet.pl
+LINKS=${BIOR_ANNOTATE_DIR}/scripts/AddLinksToVCF.pl
+TRIM=${BIOR_ANNOTATE_DIR}/scripts/VCF_remove.pl
 export JAVA_HOME=$JAVA7
 
 
@@ -109,9 +109,6 @@ then
   mv $CWD_VCF.tmp.vcf $CWD_VCF
 fi
 
-
-
-
 #IF PEDIGREE is specified, and AF, then you can run
 if [ ! -z "$PEDIGREE" ]
 then
@@ -148,7 +145,6 @@ then
   mv $CWD_VCF.tmp $CWD_VCF
 fi
 
-editLabel="bior\.\.|INFO\.|Info\.|bior\."
 #Print out table
 if [ "$table" != 0 ]
 then
@@ -165,11 +161,5 @@ then
   fi
 
   log_debug "Drilling into the data"
-
-  ## TODO: Why is this here? Did this functionality move?
-  #cat drill.table
   log "#######################################################"
-  #$PERL $INFO_PARSE $CWD_VCF -q "${DRILLS}" |grep -v "^##"|perl -pne 's/$editLabel//g' > $CWD_VCF.xls
 fi    
-#Final files $CWD_VCF & possibly $CWD_VCF.savant.xls
-

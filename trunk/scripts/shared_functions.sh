@@ -129,7 +129,7 @@ function check_cm_variable()	{
 
 function validate_catalog_file() {
   catalogs=$1
-  outdir=$2
+  TEMPDIR=$2
 
   if [ -z "$1" ]
   then 
@@ -143,9 +143,9 @@ function validate_catalog_file() {
     exit 100
   fi
 
-  # Copy filtered version of drill and catalog files to $outdir and reassign variable.
-  grep -v "^#" $catalogs > $outdir/catalog.tmp
-  catalogs="$outdir/catalog.tmp"
+  # Copy filtered version of drill and catalog files to $TEMPDIR and reassign variable.
+  grep -v "^#" $catalogs > $TEMPDIR/catalog.tmp
+  catalogs="$TEMPDIR/catalog.tmp"
 
   ##Validate catalog file
   #Make sure there are 3 columns
@@ -183,15 +183,15 @@ function validate_catalog_file() {
 }
 
 # Assumptions:
-#   Location of catalog file is: $outdir/catalog.tmp
+#   Location of catalog file is: $TEMPDIR/catalog.tmp
 function validate_drill_file() {
   drills=$1
-  outdir=$2
+  TEMPDIR=$2
 
-  catalogs=$outdir/catalog.tmp
+  catalogs=$TEMPDIR/catalog.tmp
 
-  grep -v "^#" $drills > $outdir/drills.tmp
-  drills="$outdir/drills.tmp"
+  grep -v "^#" $drills > $TEMPDIR/drills.tmp
+  drills="$TEMPDIR/drills.tmp"
 
   ##Validate drill file
   #Make sure there are 3 columns

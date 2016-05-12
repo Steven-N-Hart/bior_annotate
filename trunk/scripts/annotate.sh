@@ -55,9 +55,8 @@ fi
 
 source $tool_info
 source $BIOR_PROFILE
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "${DIR}/shared_functions.sh"
-source "${DIR}/../utils/log.sh"
+source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
+source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
 
 log_debug "Options specified: $@"
 
@@ -120,4 +119,6 @@ do
 
   VCF=${CWD_VCF}.${count}
 done <$DRILL_FILE
+
 $PERL -pne 's/bior.//g' $CWD_VCF.${count} > ${CWD_VCF}.anno 
+check_file ${CWD_VCF}.anno

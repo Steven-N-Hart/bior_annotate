@@ -8,8 +8,9 @@
 echo ""
 echo "Running ba.merge"
 echo "Options specified: $@"| tr "-" "\n"
+echo "Options specified: $@"
 
-while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
+while getopts "h:vo:t:T:d:r:ce:l:D:O:" OPTION; do
   case $OPTION in
     c) catalogs=$OPTARG ;;
     d) CREATE_DIR=$OPTARG ;;
@@ -17,8 +18,9 @@ while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
     e) editLabel=$OPTARG ;;
     h) echo "Read the instructions"
         exit ;;
-    l) LOG="TRUE" ;;
+    l) log=$OPTARG ;;
     o) outname=$OPTARG ;;
+	O) outdir=$OPTARG ;;
     r) drill=$OPTARG ;;
     t) table=$OPTARG ;;
     T) tool_info=$OPTARG ;;
@@ -35,12 +37,12 @@ while getopts "h:vo:t:T:d:r:ce:lD:" OPTION; do
 done
 
 source $tool_info
-source "${DIR}/shared_functions.sh"
-source "${DIR}/../utils/log.sh"
+source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
+source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
 
-if [ ! -z "$LOG" ] 
-then 
-set -x
+if [ "$log" == "TRUE" ]
+then
+	set -x
 fi
 
 ##################################################################################
@@ -69,14 +71,14 @@ fi
 if [ ${PRECWD_VCF: -3} == "000" ]
 then
         #Add the header from the first file
-	echo "##fileformat=VCFv4.1" > ${outname}.vcf
-         head -500 $x | grep "^##"|sort -u |$PERL -pne 's/$editLabel//g;s/\t\n/\n/' >> ${outname}.vcf
+	echo "##fileformat=VCFv4.1" > $CREATE_DIR/${outname}.vcf
+         head -500 $x | grep "^##"|sort -u |$PERL -pne 's/$editLabel//g;s/\t\n/\n/' >> $CREATE_DIR/${outname}.vcf
         #head -500 $x|grep "^##" >> ${outname}.vcf
-        tail -n1 ${PRECWD_VCF%???}.header >> ${outname}.vcf
-        cat $x|grep -v "^#"|$PERL -pne 's/\t\n/\n/;s/==/=/g;s/\t;/\t/'|$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N";$count=0};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";$count++}END{print STDERR "Found $count unique records\n"}' |uniq >> ${outname}.vcf
+        tail -n1 ${PRECWD_VCF%???}.header >> $CREATE_DIR/${outname}.vcf
+        cat $x|grep -v "^#"|$PERL -pne 's/\t\n/\n/;s/==/=/g;s/\t;/\t/'|$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N";$count=0};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";$count++}END{print STDERR "Found $count unique records\n"}' |uniq >> $CREATE_DIR/${outname}.vcf
 else
         # Get the variants only
-        cat $x|grep -v "^#" | $PERL -pne 's/$editLabel//g;s/\t\n/\n/g;s/==/=/g;s/\t;/\t/' |$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N"};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";}' |uniq >> ${outname}.vcf
+        cat $x|grep -v "^#" | $PERL -pne 's/$editLabel//g;s/\t\n/\n/g;s/==/=/g;s/\t;/\t/' |$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N"};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";}' |uniq >> $CREATE_DIR/${outname}.vcf
 fi
 done
 
@@ -84,31 +86,32 @@ if [ "$table" != "0" ]
 then
 	if [ "$table" == 1 ]
 	then
-		$PERL $DIR/bior_vcf2xls.pl -i ${outname}.vcf -o ${outname}.xls -c $CREATE_DIR/drill.table
+		$PERL $DIR/bior_vcf2xls.pl -i $CREATE_DIR/${outname}.vcf -o $CREATE_DIR/${outname}.xls -c $CREATE_DIR/drills.tmp
 	fi
 	if [ "$table" == 2 ]
 	then
-		DRILLS=`cat $CREATE_DIR/drill.table|tr "\n" ","`
-		$PERL $DIR/Info_extract2.pl ${outname}.vcf -q $DRILLS|grep -v "^##" >  ${outname}.xls
+		DRILLS=`cat $CREATE_DIR/drills.tmp|tr "\n" ","`
+		$PERL $DIR/Info_extract2.pl $CREATE_DIR/${outname}.vcf -q $DRILLS|grep -v "^##" >  $CREATE_DIR/${outname}.xls
 	fi
 fi	
 
-cat ${outname}.vcf|$BEDTOOLS/sortBed -header|uniq |$TABIX/bgzip -c > ${outname}.vcf.gz
-BEGINNING=`grep -v "^#" ${outname}.vcf|uniq|wc -l`
-FINAL=`zcat  ${outname}.vcf.gz|grep -v "^#"|wc -l`
+cat $CREATE_DIR/${outname}.vcf|$BEDTOOLS/sortBed -header|uniq |$TABIX/bgzip -c > $CREATE_DIR/${outname}.vcf.gz
+BEGINNING=`grep -v "^#" $CREATE_DIR/${outname}.vcf|uniq|wc -l`
+FINAL=`zcat  $CREATE_DIR/${outname}.vcf.gz|grep -v "^#"|wc -l`
 if [ $FINAL -lt $BEGINNING ]
 then
 	log_error "ERROR! Compression failed - only found $FINAL variants, expected $BEGINNING"
 	exit 100
 fi
-rm ${outname}.vcf
-# $TABIX/bgzip -f ${outname}.vcf
-$TABIX/tabix -f -p vcf ${outname}.vcf.gz
+$TABIX/tabix -f -p vcf $CREATE_DIR/${outname}.vcf.gz
+check_file $CREATE_DIR/${outname}.vcf.gz
+check_file $CREATE_DIR/${outname}.vcf.gz.tbi 
 
-#mv ${outname}.vcf.gz ../
+mv $CREATE_DIR/${outname}* $outdir
+cd $outdir
 
 #Clean up
-if [[ -z "$LOG" && ! -z "$CREATE_DIR" ]]
+if [[ "$log" != "TRUE" && ! -z "$CREATE_DIR" ]]
 then
   rm -r "$CREATE_DIR/"
 fi

@@ -88,22 +88,12 @@ START_DIR=$PWD
 TEMPDIR=$PWD
 NUM=20000
 log="FALSE"
-BIOR_ANNOTATE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-catalogs=${BIOR_ANNOTATE_DIR}/config/catalog_file
-drills=${BIOR_ANNOTATE_DIR}/config/drill_file
-tool_info="${BIOR_ANNOTATE_DIR}/config/tool_info.txt"
-memory_info="${BIOR_ANNOTATE_DIR}/config/memory_info.txt"
-editLabel="bior\.\.|INFO\.|Info\.|bior\."
-
-source ${BIOR_ANNOTATE_DIR}/utils/log.sh
-source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
 
 ##################################################################################
 ###
 ###     Parse Argument variables
 ###
 ##################################################################################
-log "Options specified: $@"
 
 while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
   case $OPTION in
@@ -149,6 +139,56 @@ fi
 ###     Setup configurations
 ###
 ##################################################################################
+if [ -z "$tool_info" ]
+then
+	#If the user doesn't specify a Tool info, try to find the default location
+	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	tool_info=${DIR}/config/tool_info.txt
+	source $tool_info
+else
+	source $tool_info
+fi
+
+#Make sure the BIOR_ANNOTATE_DIR is set in tool info since1 many scripts downstram will need its location
+if [ -z "$BIOR_ANNOTATE_DIR" ]
+then
+	echo "The BIOR_ANNOTATE_DIR is not set in yout tool_info file ($tool_info)"
+	exit 100
+fi
+
+if [ ! -f ${BIOR_ANNOTATE_DIR}/utils/log.sh ]
+then
+ log_error "Can not find ${BIOR_ANNOTATE_DIR}/utils/log.sh"
+ exit 100;
+else
+ source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+fi
+
+
+
+if [ -z "$catalogs" ]
+then
+	catalogs=${BIOR_ANNOTATE_DIR}/config/catalog_file
+fi
+
+if [ -z "$drills" ]
+then
+	drills=${BIOR_ANNOTATE_DIR}/config/drill_file
+fi
+
+if [ -z "$memory_info" ]
+then
+	memory_info=${BIOR_ANNOTATE_DIR}/config/memory_info.txt
+fi
+
+if [ ! -f ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh ]
+then
+ log_error "Can not find ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh"
+ exit 100;
+else
+ source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
+fi
+
 #Make sure I have the full path of the files I need
 #Check for required arguments
 if [ ! -s "$catalogs" -o ! -s "$drills" -o ! -s "$VCF" -o -z "$outname"  ]
@@ -156,9 +196,13 @@ then
   usage
   log_error "A required input parameter does not exist or the file is empty. Please check for typos."
   log_error "CATALOGS=$catalogs"
+  ls -lh $catalogs
   log_error "DRILLS=$drills"
+  ls -lh $drills
   log_error "VCF=$VCF"
+  ls -lh $VCF
   log_error "outname=$outname"
+  ls -lh $outname
   exit 100
 fi
 
@@ -245,6 +289,12 @@ export PYTHONPATH=${PERLLIB}
 export PERL5LIB=${PERL5LIB}
 export SCRIPT_DIR=${BIOR_ANNOTATE_DIR}/scripts
 
+if [ ! -d "$SCRIPT_DIR" ]; then
+  log_error "Variable not set correctly SCRIPT_DIR=$SCRIPT_DIR"
+  exit 100
+fi
+
+
 INFO_PARSE=${SCRIPT_DIR}/Info_extract2.pl
 VCF_SPLIT=${SCRIPT_DIR}/VCF_split.pl
 check_variable "$TOOL_INFO:BIOR_PROFILE" $BIOR_PROFILE
@@ -265,9 +315,6 @@ then
 	GENE_LIST="-g $GENE_LIST"
 fi
 
-#Change into tmp directory (all output files should be stored here).
-cd $TEMPDIR
-
 EMAIL=`finger $USER|grep Name|cut -f4|$PERL -pne 's/(.*;)(.*)(;.*)/$2/'`
 if [ -z "${EMAIL}" ]
 then
@@ -275,15 +322,6 @@ then
 fi
 
 
-##################################################################################
-###
-###     QC check all the inputs
-###
-##################################################################################
-
-validate_catalog_file $catalogs $outdir
-
-validate_drill_file $drills $outdir
 
 ##################################################################################
 ###
@@ -304,10 +342,20 @@ until [ ! -e ".bior.${CREATE_DIR}" ]
 do
   CREATE_DIR=$RANDOM
 done
+
+#Do all work in working directory
 mkdir .bior.${CREATE_DIR}
 cd .bior.${CREATE_DIR}
-TEMPDIR=$TEMPDIR/.bior.${CREATE_DIR}
-CURRENT_LOCATION=$PWD
+TEMPDIR=$PWD
+
+##################################################################################
+###
+###     QC check all the inputs
+###
+##################################################################################
+
+validate_catalog_file $catalogs $TEMPDIR
+validate_drill_file $drills $TEMPDIR
 
 #Calculate the number of catalogs
 NUM_CATALOGS_TO_DRILL=`awk 'END{print NR }' $drills`
@@ -328,8 +376,6 @@ then
 else
 	cat $VCF|$PERL $VCF_SPLIT | grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
 fi
-
-#log `ls $TEMPDIR/$CWD_VCF`
 
 if [ "$CLINICAL" == "TRUE" ]
 then
@@ -366,6 +412,8 @@ do
 	cat ${CWD_VCF}.header $x > ${CWD_VCF}.tmp
 	mv ${CWD_VCF}.tmp $x
 done
+
+
 ##################################################################################
 ###
 ###     Fire off the qsubs for each split VCF file
@@ -384,12 +432,12 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
- log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
- sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
+  log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
+  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
  cd $START_DIR
  if [[ "$log" != "TRUE"  ]]
  then
-   rm -r ./.bior.${CREATE_DIR} $catalogs $drills
+   rm -r "$TEMPDIR" "$catalogs" "$drills"
  fi
  exit 0
 fi
@@ -419,12 +467,12 @@ do
 	then
 		if [ "$job_suffix" ]
 		then
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix annotate.sh $x"
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
 		else
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf annotate.sh $x"
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
 		fi
 	else
-		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf annotate.sh $x"
+		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
 	fi	
 	JOB1=`eval "$command" |cut -f3 -d ' ' `
 	 
@@ -452,7 +500,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o $outdir/${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
+	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR -l ${log}"
 		LOG="-l"
 fi
 
@@ -460,14 +508,18 @@ if [ "$job_name" ]
 then
 	if [ "$job_suffix" ]
 	then
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	else
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	fi
 else
-	command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outdir}/${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+	#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 fi	
 eval "$command" 
+
 log "You will be notified by e-mail as your jobs are processed. The baMerge job will be the last to complete."
 log "** NOTE: when submitting to SGE, there will be multiple jobs created. You can monitor your jobs using qstat. **"
 
@@ -477,4 +529,4 @@ then
 	cd $START_DIR
 fi
 
-rm $catalogs $drills
+
