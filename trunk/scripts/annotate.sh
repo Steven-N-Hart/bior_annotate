@@ -36,7 +36,7 @@ while getopts "c:d:hlT:v:" OPTION; do
     l)  log="TRUE" ;;
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
-    *) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
+    *) echo "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
   esac

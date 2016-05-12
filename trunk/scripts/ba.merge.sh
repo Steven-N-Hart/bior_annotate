@@ -109,10 +109,10 @@ check_file $CREATE_DIR/${outname}.vcf.gz.tbi
 
 mv $CREATE_DIR/${outname}* $outdir
 cd $outdir
-
 #Clean up
 if [[ "$log" != "TRUE" && ! -z "$CREATE_DIR" ]]
 then
-  rm -r "$CREATE_DIR/"
+  log_debug "CREATE_DIR=$CREATE_DIR"
+  rm -r "$CREATE_DIR/.bior*"
 fi
 

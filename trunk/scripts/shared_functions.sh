@@ -257,6 +257,5 @@ function validate_drill_file() {
     let NUM_ROWS-=1;
   done
 
-  log "All drill values are validated" 
-
+  log "All drill values are validated in $drills" 
 }	

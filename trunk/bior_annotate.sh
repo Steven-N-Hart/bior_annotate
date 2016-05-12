@@ -95,6 +95,7 @@ log="FALSE"
 ###
 ##################################################################################
 
+
 while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
   case $OPTION in
   	a)  runCAVA="" ;;
@@ -120,10 +121,10 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
-    \?) log_error "Invalid option: -$OPTARG. See output file for usage." >&2
+    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
-    :)  log_error "Option -$OPTARG requires an argument. See output file for usage." >&2
+    :)  echo "Option -$OPTARG requires an argument. See output file for usage." >&2
         usage
         exit ;;
   esac
@@ -207,9 +208,9 @@ then
 fi
 
 if  [[ $outname == *"/"* ]]
-then 
-  log_error "Please do not use a path for this variable!"
-  usage
+then
+  usage 
+  echo "Please do not use a path for the output file name."
   exit 100
 fi
 
@@ -218,9 +219,9 @@ if [ -z "$tool_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log_warning "No tool_info specified, using $tool_info"
+      echo "No tool_info specified, using $tool_info"
     else
-      log_error "A tool_info file is required when submitting to the grid."
+      echo "A tool_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -229,9 +230,9 @@ if [ -z "$memory_info" ]
 then
     if [ "$QUEUEOVERRIDE" == "NA" ]
     then
-      log_warning "No memory_info specified, using $memory_info"		
+      echo "No memory_info specified, using $memory_info"		
     else
-      log_error "A memory_info file is required when submitting to the grid."
+      echo "A memory_info file is required when submitting to the grid."
       exit 100
     fi
 fi
@@ -243,9 +244,9 @@ memory_info=`readlink -m ${memory_info}`
 #Makes sure files exist
 if [ ! -s "$tool_info" -o ! -s "$memory_info" ]
 then
-	log_error "Check the location of your tool and memory info files"
-	log_error "tool_info=$tool_info"
-	log_error "memory_info=$memory_info"
+	echo "Check the location of your tool and memory info files"
+	echo "tool_info=$tool_info"
+	echo "memory_info=$memory_info"
 	exit 100
 fi
 
@@ -266,10 +267,14 @@ source ${memory_info}
 # This variable should be defined in the tool_info file.
 if [ -z "${BIOR_ANNOTATE_DIR}" ]
 then
-  log_error "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
+  echo "BIOR_ANNOTATE_DIR is not defined in $tool_info. This is a required variable."
   exit 100
+else
+  echo "BIOR_ANNOTATE_DIR=$BIOR_ANNOTATE_DIR"
 fi
 
+source ${BIOR_ANNOTATE_DIR}/utils/log.sh
+source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
 source ${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh
 
 
@@ -434,6 +439,7 @@ then
   log ""
   log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
   sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
+
  cd $START_DIR
  if [[ "$log" != "TRUE"  ]]
  then
@@ -467,12 +473,12 @@ do
 	then
 		if [ "$job_suffix" ]
 		then
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf.$job_suffix $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 		else
-			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
+			command=$"$args -l h_vmem=$annotate_mem -N $job_name.annotatevcf $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 		fi
 	else
-		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf ${SCRIPT_DIR}/annotate.sh -v $x -c ${catalogs} -d ${drills} -T ${tool_info} "
+		command=$"$args -l h_vmem=$annotate_mem -N annotatevcf $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 	fi	
 	JOB1=`eval "$command" |cut -f3 -d ' ' `
 	 
@@ -500,7 +506,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR -l ${log}"
+	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
 		LOG="-l"
 fi
 
@@ -517,6 +523,7 @@ then
 else
 	#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+
 fi	
 eval "$command" 
 
@@ -528,5 +535,4 @@ if [ ! -z "$TEMPDIR" ]
 then
 	cd $START_DIR
 fi
-
 

@@ -118,8 +118,24 @@ call_bior_annotate() {
 
   log "Calling: $CMD" "debug"
   eval $CMD
-  
 
+  if [ "$QUEUE" != "NA" ]
+  then  
+    while [ ! -z "`qstat -q $QUEUE | grep AUTO_TEST`" ]
+    do
+      NUM_JOBS=`qstat -q $QUEUE | grep AUTO_TEST | wc -l`
+      ERROR_JOBS=`qstat -q $QUEUE | grep Eqw | wc -l`
+      if [[ -z "$ERROR_JOBS" || "$ERROR_JOBS" == "0" ]]
+      then
+        log "Still running: $NUM_JOBS jobs remain in the queue"
+      else
+        log "Detected a job in the error state. Exiting."
+        log_debug "`qstat -q $QUEUE`"
+	exit 1
+      fi
+      sleep 20
+    done
+  fi
 }
 
 # Function: 

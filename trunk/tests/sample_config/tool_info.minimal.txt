@@ -27,8 +27,9 @@ NOTIFICATION_OPTION="ae"
 #Base funcitons
 PYTHON="/usr/local/biotools/python/2.7.10/bin"
 PYTHONLIB="/data5/bsi/bictools/lib/python/2.7.10/lib/python2.7/site-packages:/home/biotools/python/2.7.10/lib/python2.7/site-packages"
-PERL="/usr/bin/perl"
-PERLLIB="/usr/local/biotools/perl/5.10.0/lib/site_perl/5.10.0/x86_64-linux/"
+export LD_LIBRARY_PATH="/usr/local/biotools/python/2.7.10/lib/"
+PERL="/usr/local/biotools/perl/5.16.2-centos6/bin/perl"
+PERLLIB="/data5/bsi/bictools/perl/perl5/lib/perl5/"
 JAVA7="/usr/local/biotools/java/jdk1.7.0_03/bin"
 
 ## Change to match test directory
