@@ -33,6 +33,7 @@ source "$BIOR_ANNOTATE/utils/log.sh"
 # Environment variables used=default value:
 #   BIOR_CATALOGS="$BIOR_ANNOTATE/config/catalog_file"
 #   BIOR_DRILLS="$BIOR_ANNOTATE/config/drill_file"
+#   COMPRESS="yes"
 #   INPUT_VCF="test.vcf"
 #   MEMORY_INFO="$BIOR_ANNOTATE/config/memory_info.txt"
 #   OUTPUT_VCF="test_output.vcf"
@@ -70,6 +71,11 @@ call_bior_annotate() {
   if [ -z "$BIOR_DRILLS" ]
   then
     local BIOR_DRILLS="$DESTINATION_DIR/drill_file"
+  fi
+
+  if [ -z "$COMPRESS" ]
+  then
+    local COMPRESS="yes"
   fi
 
   if [ -z "$INPUT_VCF" ]
@@ -114,7 +120,7 @@ call_bior_annotate() {
     exit 1
   fi
 
-  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE"
+  CMD="$BIOR_ANNOTATE/bior_annotate.sh -v $INPUT_VCF -c $BIOR_CATALOGS -d $BIOR_DRILLS -O $DESTINATION_DIR -o $OUTPUT_VCF -x $DESTINATION_DIR -T $TOOL_INFO -M $MEMORY_INFO -j AUTO_TEST.bior_annotate. -Q $QUEUE -t $TABLE -z $COMPRESS"
 
   log "Calling: $CMD" "debug"
   eval $CMD
