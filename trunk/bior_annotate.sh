@@ -352,14 +352,14 @@ fi
 #Start off by creating a random directory to make sure we never have naming conflicts
 CREATE_DIR=$RANDOM
 # if we accidentally create a directory that already exists, try again.
-until [ ! -e ".bior.${CREATE_DIR}" ]
+until [ ! -e "$TEMPDIR/.bior.${CREATE_DIR}" ]
 do
   CREATE_DIR=$RANDOM
 done
 
 #Do all work in working directory
-mkdir .bior.${CREATE_DIR}
-cd .bior.${CREATE_DIR}
+mkdir $TEMPDIR/.bior.${CREATE_DIR}
+cd $TEMPDIR/.bior.${CREATE_DIR}
 TEMPDIR=$PWD
 
 ##################################################################################
