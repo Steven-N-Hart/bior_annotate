@@ -435,14 +435,10 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
-  log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l
-  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l 
+  log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}
+  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}
 
  cd $START_DIR
- if [[ "$log" != "TRUE"  ]]
- then
-   rm -r "$TEMPDIR" "$catalogs" "$drills"
- fi
  exit 0
 fi
 
@@ -512,14 +508,11 @@ if [ "$job_name" ]
 then
 	if [ "$job_suffix" ]
 	then
-		#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	else
-		#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	fi
 else
-	#command=$"$args $hold -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
 
 fi	
