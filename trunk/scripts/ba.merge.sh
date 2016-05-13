@@ -10,7 +10,7 @@ echo "Running ba.merge"
 echo "Options specified: $@"| tr "-" "\n"
 echo "Options specified: $@"
 
-while getopts "h:vo:t:T:d:r:ce:l:D:O:" OPTION; do
+while getopts "h:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
   case $OPTION in
     c) catalogs=$OPTARG ;;
     d) CREATE_DIR=$OPTARG ;;
@@ -25,6 +25,7 @@ while getopts "h:vo:t:T:d:r:ce:l:D:O:" OPTION; do
     t) table=$OPTARG ;;
     T) tool_info=$OPTARG ;;
     v) echo "WARNING: option -v is deprecated." ;;
+    z) COMPRESS=$OPTARG ;;
    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
        usage
        exit ;;
@@ -95,15 +96,20 @@ then
 	fi
 fi	
 
-cat $CREATE_DIR/${outname}.vcf|$BEDTOOLS/sortBed -header|uniq |$TABIX/bgzip -c > $CREATE_DIR/${outname}.vcf.gz
-BEGINNING=`grep -v "^#" $CREATE_DIR/${outname}.vcf|uniq|wc -l`
-FINAL=`zcat  $CREATE_DIR/${outname}.vcf.gz|grep -v "^#"|wc -l`
-if [ $FINAL -lt $BEGINNING ]
+if [[ "$COMPRESS" == "yes" ]]
 then
-	log_error "ERROR! Compression failed - only found $FINAL variants, expected $BEGINNING"
-	exit 100
+  cat $CREATE_DIR/${outname}.vcf|$BEDTOOLS/sortBed -header|uniq |$TABIX/bgzip -c > $CREATE_DIR/${outname}.vcf.gz
+  BEGINNING=`grep -v "^#" $CREATE_DIR/${outname}.vcf|uniq|wc -l`
+  FINAL=`zcat  $CREATE_DIR/${outname}.vcf.gz|grep -v "^#"|wc -l`
+  if [ $FINAL -lt $BEGINNING ]
+  then
+    log_error "ERROR! Compression failed - only found $FINAL variants, expected $BEGINNING"
+    exit 100
+  fi
+  $TABIX/tabix -f -p vcf $CREATE_DIR/${outname}.vcf.gz
+else
+  log_debug "Not compressing final file due to runtime option. Tabix index will also not be generated."
 fi
-$TABIX/tabix -f -p vcf $CREATE_DIR/${outname}.vcf.gz
 
 mv $CREATE_DIR/${outname}* $outdir
 cd $outdir

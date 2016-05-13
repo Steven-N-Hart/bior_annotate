@@ -85,6 +85,40 @@ validate_good_path() {
   
 }
 
+# Function: validate_good_path
+# Description:
+#   Performs the following basic good path validation:
+#   1. Run bior_annotate on test VCF
+#   2. Checks to ensure that result VCF exists at output location.
+#
+# Arguments: 
+#   $1 - Path to output directory
+#
+# Usage: 
+#   validate_good_path $outputdir
+# 
+# Returns:
+#   0 - success, all checks passed
+#   1 - VCF did not pass validation
+#   2 - Tabix index file did not pass validation
+validate_good_path_no_compression() {
+  local TEST_DIR=$1
+
+  # Assume success
+  TEST_RESULT="0"
+
+  # Call bior_annotate.sh
+  QUEUE="NA"
+  COMPRESS="no"
+  call_bior_annotate $TEST_DIR
+
+  # Test whether expected files were created
+  file_list_validation "$TEST_DIR/test_out.vcf"
+  RETURN_CODE=$?
+
+  return $RETURN_CODE
+}
+
 # Function: validate_good_path_format_version_1
 # Description:
 #   Performs the following basic good path validation:
@@ -182,7 +216,7 @@ EXIT_CODE=0
 TEST_NUMBER=1
 
 # Tests executed:
-TESTS="validate_good_path validate_good_path_table_format_version_1 validate_good_path_table_format_version_2"
+TESTS="validate_good_path validate_good_path_table_format_version_1 validate_good_path_table_format_version_2 validate_good_path_no_compression"
 
 ### Run tests in list
 for TEST in $TESTS

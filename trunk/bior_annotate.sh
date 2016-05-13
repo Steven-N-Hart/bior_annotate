@@ -45,6 +45,7 @@ cat << EOF
 ##      -T    tool info file
 ##	-e    This option substitutes and expression to blank (e.g. some unecessary info frorm bior) [bior\.\.|INFO\.|Info\.|bior\.]
 ##      -x    path to temp directory [default: cwd]
+##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
 ##
 ##
 ##	Clinical specific options (DLMP use only)
@@ -88,6 +89,7 @@ START_DIR=$PWD
 TEMPDIR=$PWD
 NUM=20000
 log="FALSE"
+COMPRESS="yes"
 
 ##################################################################################
 ###
@@ -96,7 +98,7 @@ log="FALSE"
 ##################################################################################
 
 
-while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
+while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
   case $OPTION in
   	a)  runCAVA="" ;;
     c)  catalogs=$OPTARG ;;     #
@@ -121,6 +123,15 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:" OPTION; do
     T)  tool_info=$OPTARG ;;     #
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
+    z)  if [[ "$OPTARG" == "yes" || "$OPTARG" == "no" ]]
+        then
+          COMPRESS=$OPTARG
+        else
+          usage
+          echo "-z must use either \"yes\" or \"no\""
+          exit
+        fi
+        ;;
     \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
         usage
         exit ;;
@@ -341,14 +352,14 @@ fi
 #Start off by creating a random directory to make sure we never have naming conflicts
 CREATE_DIR=$RANDOM
 # if we accidentally create a directory that already exists, try again.
-until [ ! -e ".bior.${CREATE_DIR}" ]
+until [ ! -e "$TEMPDIR/.bior.${CREATE_DIR}" ]
 do
   CREATE_DIR=$RANDOM
 done
 
 #Do all work in working directory
-mkdir .bior.${CREATE_DIR}
-cd .bior.${CREATE_DIR}
+mkdir $TEMPDIR/.bior.${CREATE_DIR}
+cd $TEMPDIR/.bior.${CREATE_DIR}
 TEMPDIR=$PWD
 
 ##################################################################################
@@ -435,8 +446,9 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
-  log $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}
-  sh $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}
+  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
+  log $COMMAND
+  eval $COMMAND
 
  cd $START_DIR
  exit 0
@@ -508,12 +520,12 @@ if [ "$job_name" ]
 then
 	if [ "$job_suffix" ]
 	then
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge.$job_suffix $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 	else
-		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 	fi
 else
-	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log}"
+	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 
 fi	
 eval "$command" 
