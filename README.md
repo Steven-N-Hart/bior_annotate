@@ -26,6 +26,7 @@ README instructions
 ##                              Version 2: First N columns like VCF, one colulmn containing sample names
 ##      -T    tool info file from GGPS
 ##      -x    path to temp directory [default: cwd]
+##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
 ##
 ##
 ##      Clinical specific options (DLMP use only)
