@@ -6,8 +6,10 @@ REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
 CAVA=/data5/bsi/bictools/src/cava/1.1.1.mayo/cava.py
 CAVA_CONFIG=/data5/bsi/bictools/src/cava/1.1.1.mayo/config.txt
 
-BIOR="/usr/local/biotools/bior_scripts/2.4.0/bior_pipeline-2.4.0/bin/"
-BIOR_PROFILE="/usr/local/biotools/bior_scripts/2.4.1/PKG_PROFILE"
+#BIOR="/usr/local/biotools/bior_scripts/2.4.0/bior_pipeline-2.4.0/bin/"
+#BIOR_PROFILE="/usr/local/biotools/bior_scripts/2.4.1/PKG_PROFILE"
+BIOR="/usr/local/biotools/bior_scripts/4.0.0/bior_pipeline-4.0.0/bin/"
+BIOR_PROFILE="/usr/local/biotools/bior_scripts/4.0.0/PKG_PROFILE"
 #BIOR_PROFILE="/data5/bsi/BIOR/Versions/setLatest.sh"
 #BIOR="/data5/bsi/BIOR/Versions/bior_pipeline-4.0.0-SNAPSHOT/bin"
 

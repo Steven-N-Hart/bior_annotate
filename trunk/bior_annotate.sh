@@ -512,7 +512,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	log "$args-hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
+	log "$args -hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
 		LOG="-l"
 fi
 
