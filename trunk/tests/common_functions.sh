@@ -39,7 +39,7 @@ source "$BIOR_ANNOTATE/utils/log.sh"
 #   OUTPUT_VCF="test_output.vcf"
 #   QUEUE="1-day"
 #   TABLE="0"
-#   TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
+#   TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.minimal.txt"
 #
 # Usage: 
 #   Disable queue
