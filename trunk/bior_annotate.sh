@@ -29,6 +29,7 @@ cat << EOF
 ##   Optional:
 ##      -c    path to catalog file
 ##      -d    Path to the drill file
+##      -e    This option substitutes an expression to blank (e.g. some unecessary info form bior) [bior\.\.|INFO\.|Info\.|bior\.]
 ##      -h    Display this usage/help text
 ##      -j    job name for qsub command
 ##      -l    set logging
@@ -43,7 +44,6 @@ cat << EOF
 ##              -t 1: Separate columns for Depth, GQ, AD, and GT per sample
 ##              -t 2: First N columns like VCF, one colulmn containing sample names
 ##      -T    tool info file
-##	-e    This option substitutes and expression to blank (e.g. some unecessary info frorm bior) [bior\.\.|INFO\.|Info\.|bior\.]
 ##      -x    path to temp directory [default: cwd]
 ##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
 ##
@@ -51,9 +51,7 @@ cat << EOF
 ##	Clinical specific options (DLMP use only)
 ##      -P    PEDIGREE file (for trios only, this will add extra annotations)
 ##      -g    GENE list (only used with pedigrees)
-
-
-
+##
 #########################################################################################################
 
 Examples:
@@ -78,6 +76,9 @@ Examples:
                        column 2 is what features you want to drill out of that catalog
 
                        The name in the drill_file must match the name in the catalog_file EXACTLY
+
+####
+
 EOF
 }
 
@@ -100,7 +101,7 @@ COMPRESS="yes"
 
 while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
   case $OPTION in
-  	a)  runCAVA="" ;;
+    a)  runCAVA="" ;;
     c)  catalogs=$OPTARG ;;     #
     C)  CLINICAL="TRUE" ;;
     d)  drills=$OPTARG ;;       #
@@ -164,13 +165,13 @@ fi
 #Make sure the BIOR_ANNOTATE_DIR is set in tool info since1 many scripts downstram will need its location
 if [ -z "$BIOR_ANNOTATE_DIR" ]
 then
-	echo "The BIOR_ANNOTATE_DIR is not set in yout tool_info file ($tool_info)"
+	echo "The BIOR_ANNOTATE_DIR is not set in your tool_info file ($tool_info)"
 	exit 100
 fi
 
 if [ ! -f ${BIOR_ANNOTATE_DIR}/utils/log.sh ]
 then
- log_error "Can not find ${BIOR_ANNOTATE_DIR}/utils/log.sh"
+ echo "ERROR: Cannot find ${BIOR_ANNOTATE_DIR}/utils/log.sh"
  exit 100;
 else
  source ${BIOR_ANNOTATE_DIR}/utils/log.sh
@@ -195,7 +196,7 @@ fi
 
 if [ ! -f ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh ]
 then
- log_error "Can not find ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh"
+ echo "ERROR: Cannot find ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh"
  exit 100;
 else
  source ${BIOR_ANNOTATE_DIR}/utils/file_validation.sh
@@ -206,15 +207,11 @@ fi
 if [ ! -s "$catalogs" -o ! -s "$drills" -o ! -s "$VCF" -o -z "$outname"  ]
 then
   usage
-  log_error "A required input parameter does not exist or the file is empty. Please check for typos."
-  log_error "CATALOGS=$catalogs"
-  ls -lh $catalogs
-  log_error "DRILLS=$drills"
-  ls -lh $drills
-  log_error "VCF=$VCF"
-  ls -lh $VCF
-  log_error "outname=$outname"
-  ls -lh $outname
+  echo "ERROR: A required input parameter does not exist or the file is empty. Please check for typos."
+  echo "CATALOGS=$catalogs"
+  echo "DRILLS=$drills"
+  echo "VCF=$VCF"
+  echo "outname=$outname"
   exit 100
 fi
 
