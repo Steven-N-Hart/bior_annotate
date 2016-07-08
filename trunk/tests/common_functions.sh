@@ -39,7 +39,7 @@ source "$BIOR_ANNOTATE/utils/log.sh"
 #   OUTPUT_VCF="test_output.vcf"
 #   QUEUE="1-day"
 #   TABLE="0"
-#   TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.minimal.txt"
+#   TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
 #
 # Usage: 
 #   Disable queue
@@ -65,12 +65,12 @@ call_bior_annotate() {
   # Set up default values used if nothing else overrides them.
   if [ -z "$BIOR_CATALOGS" ]
   then
-    local BIOR_CATALOGS="$DESTINATION_DIR/catalog_file"
+    local BIOR_CATALOGS="$BIOR_ANNOTATE/config/catalog_file"
   fi
 
   if [ -z "$BIOR_DRILLS" ]
   then
-    local BIOR_DRILLS="$DESTINATION_DIR/drill_file"
+    local BIOR_DRILLS="$BIOR_ANNOTATE/config/drill_file"
   fi
 
   if [ -z "$COMPRESS" ]
@@ -80,12 +80,12 @@ call_bior_annotate() {
 
   if [ -z "$INPUT_VCF" ]
   then
-    local INPUT_VCF="$DESTINATION_DIR/test.vcf"
+    local INPUT_VCF="$BIOR_ANNOTATE/test.vcf"
   fi
 
   if [ -z "$MEMORY_INFO" ]
   then
-    local MEMORY_INFO="$DESTINATION_DIR/memory_info.txt"
+    local MEMORY_INFO="$BIOR_ANNOTATE/config/memory_info.txt"
   fi
 
   if [ -z "$OUTPUT_VCF" ]
@@ -105,7 +105,7 @@ call_bior_annotate() {
 
   if [ -z "$TOOL_INFO" ]
   then
-    local TOOL_INFO="$DESTINATION_DIR/tool_info.minimal.txt"
+    local TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
   fi
 
   log "Validating that all files are ready to submit" "debug"
@@ -254,7 +254,7 @@ print_summary() {
 # Arguments (all are optional, empty strings will use defaults): 
 #   $1 - destination directory
 #   $2 - Test VCF (default: sample_config/test.vcf)
-#   $3 - tool_info (default: sample_config/tool_info.minimal.txt)
+#   $3 - tool_info (default: sample_config/tool_info.txt)
 #   $4 - catalog_file (default: sample_config/catalog_file)
 #   $5 - drill_file (default: sample_config/drill_file)
 #   $6 - memory_info (default: sample_config/memory_info.txt)
@@ -285,27 +285,27 @@ setup_inputs() {
 
   if [ -z "$TEST_VCF" ]
   then
-    TEST_VCF="$BIOR_ANNOTATE/tests/sample_config/test.vcf"
+    TEST_VCF="$BIOR_ANNOTATE/test.vcf"
   fi
   
   if [ -z "$TOOL_INFO" ]
   then
-    TOOL_INFO="$BIOR_ANNOTATE/tests/sample_config/tool_info.minimal.txt"
+    TOOL_INFO="$BIOR_ANNOTATE/config/tool_info.txt"
   fi
 
   if [ -z "$CATALOG_FILE" ]
   then
-    CATALOG_FILE="$BIOR_ANNOTATE/tests/sample_config/catalog_file"
+    CATALOG_FILE="$BIOR_ANNOTATE/config/catalog_file"
   fi
 
   if [ -z "$DRILL_FILE" ]
   then
-    DRILL_FILE="$BIOR_ANNOTATE/tests/sample_config/drill_file"
+    DRILL_FILE="$BIOR_ANNOTATE/config/drill_file"
   fi
 
   if [ -z "$MEMORY_INFO" ]
   then
-    MEMORY_INFO="$BIOR_ANNOTATE/tests/sample_config/memory_info.txt"
+    MEMORY_INFO="$BIOR_ANNOTATE/config/memory_info.txt"
   fi
 
   log "Copying files to test dir" "debug"
