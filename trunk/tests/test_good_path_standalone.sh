@@ -17,7 +17,7 @@ EOF
 
 ### Arguments parsing and prerequisite checking
 # Defaults:
-TEST_DIR="."
+TEST_DIR="$PWD"
 
 while getopts "d:ht:" OPTION; do
   case $OPTION in
