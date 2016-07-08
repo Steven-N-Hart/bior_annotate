@@ -430,7 +430,7 @@ done
 ###     Fire off the qsubs for each split VCF file
 ###
 #################################################################################
-args="$SGE_BASE/qsub -cwd -q $QUEUE -m ae -notify -M $EMAIL -l h_stack=$SGE_STACK"
+args="$SGE_BASE/qsub -cwd -q $QUEUE -m a -notify -M $EMAIL -l h_stack=$SGE_STACK"
 #Option to run off SGE
 if [ "$QUEUE" == "NA" ]
 then
