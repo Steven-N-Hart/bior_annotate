@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -o pipefail
 ##################################################################################
 ###
 ###     Name:           bior_annotate.sh
@@ -312,7 +313,7 @@ VCF_SPLIT=${SCRIPT_DIR}/VCF_split.pl
 check_variable "$TOOL_INFO:BIOR_PROFILE" $BIOR_PROFILE
 source $BIOR_PROFILE
 check_variable "$TOOL_INFO:PERL" $PERL
-
+check_variable "$TOOL_INFO:VT" $VT
 check_variable "$TOOL_INFO:BEDTOOLS" $BEDTOOLS
 
 if [ ! -z "$PEDIGREE" -a "$PEDIGREE" != "NA" ]
@@ -383,10 +384,20 @@ CWD_VCF=`basename $VCF`
 #Remove IDs from VCFs b/c bior uses them incorrectly
 if [[ "$CWD_VCF" == *gz ]] ;
 then
-	zcat $VCF|$PERL $VCF_SPLIT| grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' >${CWD_VCF/.gz/}
+	zcat $VCF|\
+	$PERL $VCF_SPLIT|\
+	grep -v 'NON_REF'|\
+	 $PERL -pne 's/[ |\t]$//g'|\
+	$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}'|\
+	$VT/vt normalize -r $REF_GENOME - >${CWD_VCF/.gz/}
 	CWD_VCF=${CWD_VCF/.gz/}
 else
-	cat $VCF|$PERL $VCF_SPLIT | grep -v 'NON_REF'| $PERL -pne 's/[ |\t]$//g'|$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' > $CWD_VCF
+	cat $VCF|\
+	$PERL $VCF_SPLIT |\
+	grep -v 'NON_REF'|\
+	$PERL -pne 's/[ |\t]$//g'|\
+	$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' |\
+	$VT/vt normalize -r $REF_GENOME - > $CWD_VCF
 fi
 
 if [ "$CLINICAL" == "TRUE" ]

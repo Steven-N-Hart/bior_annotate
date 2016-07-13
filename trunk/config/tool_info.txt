@@ -9,7 +9,8 @@ JAVA7="/usr/local/biotools/java/jdk1.7.0_03/bin"
 
 PYTHON="/usr/local/biotools/python/2.7.10/bin"
 PYTHONLIB="/data5/bsi/bictools/lib/python/2.7.10/lib/python2.7/site-packages:/home/biotools/python/2.7.10/lib/python2.7/site-packages"
-export LD_LIBRARY_PATH="/usr/local/biotools/python/2.7.10/lib/"
+#Need to make sure to have GLIBC IN PATH
+export LD_LIBRARY_PATH="/usr/local/biotools/python/2.7.10/lib/:/data5/bsi/bictools/misc/gcc/4.8.2/lib64/"
 
 GATK="/data5/bsi/bictools/alignment/gatk/3.3-0"
 REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
@@ -27,6 +28,8 @@ BEDTOOLS=/projects/bsi/bictools/apps/misc/BEDTools/2.16.2/bin
 SNPEFF="/projects/bsi/bictools/apps/annotation/snpeff/3.5h"
 SNPEFF_DB="GRCh37.74"
 SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
+
+VT="/data5/bsi/bictools/src/vt/2016_03_24/"
 
 # Default queue for bior_annotate
 QUEUE="1-day"
