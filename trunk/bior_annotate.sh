@@ -33,7 +33,7 @@ cat << EOF
 ##      -h    Display this usage/help text
 ##      -j    job name for qsub command
 ##      -l    set logging
-##      -L    Do not add links to VCF [default is set to TRUE]
+##      -L    Add link references to VCF [default: filter out link references]
 ##      -M    memory info file from GGPS
 ##      -n    Number of lines to split the data into  [default:20000]
 ##      -s    Flag to turn on SNPEFF
@@ -91,6 +91,7 @@ TEMPDIR=$PWD
 NUM=20000
 log="FALSE"
 COMPRESS="yes"
+KEEP_LINKS="TRUE"
 
 ##################################################################################
 ###
@@ -112,7 +113,7 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
     j)  job_name=$OPTARG ;;     #
     k)  job_suffix=$OPTARG ;;
     l)  log="TRUE" ;;           #
-    L)  addLinks=" -L " ;;      #
+    L)  keepLinks="TRUE" ;;      #
     M)  memory_info=$OPTARG ;; #
     n)  NUM=$OPTARG ;;       #
     o)  outname=$OPTARG ;;   #
@@ -443,7 +444,7 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
-  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
+  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS"
   log $COMMAND
   eval $COMMAND
 
@@ -525,7 +526,7 @@ else
 	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 
 fi	
-eval "$command" 
+eval "$command -L $KEEP_LINKS" 
 
 log "You will be notified by e-mail as your jobs are processed. The baMerge job will be the last to complete."
 log "** NOTE: when submitting to SGE, there will be multiple jobs created. You can monitor your jobs using qstat. **"
