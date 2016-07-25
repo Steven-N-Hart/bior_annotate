@@ -83,7 +83,7 @@ open (VCF,"$vcf") or die "Can't open VCF\n";
 						@gt=uniq(@gt);
 						$lenGT=scalar(@gt);
 						print STDERR "lenGT=$lenGT\t and EFFECTS=@GeneEffect\n" if ($verbose);
-						#@getGeneEffect=uniq(@getGeneEffect);
+						@GeneEffect = uniq @GeneEffect;
 						$EFFECTS=join(",",@GeneEffect);
 						for my $VCFLINES (@array){
 							my @NEWLINE=split("\t",$VCFLINES);
