@@ -83,6 +83,8 @@ ESP/
             ESP6500.vcf.tsv.bgz
             ESP6500.vcf.tsv.bgz.tbi
 ```
+> Notice with this directory structure, you can keep multiple versions of the same source availalble (e.g. dbSNP).  You don't even need to keep them all in the same directory structure as shown.
+
 #### Setup/Install docker environment
 ```
 docker build -t stevenhart/bior_annotate:latest dockerFiles/
