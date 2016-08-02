@@ -5,13 +5,15 @@
 #### Install
 ```
 git clone https://github.com/Steven-N-Hart/bior_annotate.git
-git checkout v2.7
 cd bior_annotate/dockerFiles
+git checkout v2.8.3
+
 ```
-#### Download Reference files
+#### Download Reference files (this may take some time depending on your connection speed)
 ```
 #Get human reference genome
-curl -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz 
+mkdir references
+curl -# -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz 
 bgzip -dc references/hg19.fa.gz > references/hg19.fa
 samtools faidx references/hg19.fa
 
