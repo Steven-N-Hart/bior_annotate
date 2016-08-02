@@ -18,7 +18,8 @@ bgzip -dc references/hg19.fa.gz > references/hg19.fa
 samtools faidx references/hg19.fa
 
 #Now get the test VCF File
-curl -# -O 
+curl -# -o chr17.1kg.vcf.gz ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+
 ```
 #### Get bior catalogs 
 ```
