@@ -1,10 +1,11 @@
 #If you have any defaults you want to override, specify them below this line
 
 BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/"
+#BIOR_ANNOTATE_DIR="/home/m110872/workspace/bior_annotate/trunk/"
 
 SGE_BASE="/home/oge/ge2011.11/bin/linux-x64/"
-PERL="/usr/bin/perl"
-PERLLIB="/usr/local/biotools/perl/5.10.0/lib/site_perl/5.10.0/x86_64-linux/"
+PERL="/usr/local/biotools/perl/5.16.2-centos6/bin/perl"
+PERLLIB="/data5/bsi/bictools/perl/perl5/lib/perl5:/data5/bsi/bictools/perl/perl5/lib/perl5/x86_64-linux"
 JAVA7="/usr/local/biotools/java/jdk1.7.0_03/bin"
 
 PYTHON="/usr/local/biotools/python/2.7.10/bin"
