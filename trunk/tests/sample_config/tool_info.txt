@@ -27,6 +27,8 @@ SNPEFF="/projects/bsi/bictools/apps/annotation/snpeff/3.5h"
 SNPEFF_DB="GRCh37.74"
 SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
 
+VT="/data5/bsi/bictools/src/vt/2016_03_24/"
+
 # Default queue for bior_annotate
 QUEUE="1-day"
 
