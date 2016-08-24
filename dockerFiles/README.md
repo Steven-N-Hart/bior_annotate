@@ -132,7 +132,7 @@ wget https://github.com/Steven-N-Hart/bior_annotate/blob/master/dockerFiles/tool
 #### Run the demo
 You can use the `test.vcf` provided in your `bior_annotate` directory
 ```
-docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -v ./bior_annotate/trunk/test.vcf -c catalogFile.docker -d drillFile.docker -T tool_info.txt -o TEST  
+docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -v test.vcf -c catalogFile.docker -d drillFile.docker -T tool_info.txt -o TEST  
 ```
 
 
