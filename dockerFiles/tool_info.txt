@@ -1,13 +1,11 @@
 ## path to all the tools and references to run workflow
 
 
-WORKFLOW_PATH="/Data/trunk/scripts"
-BIOR_ANNOTATE_DIR="/Data/trunk"
+WORKFLOW_PATH="/bior_annotate/trunk/scripts"
+BIOR_ANNOTATE_DIR="/bior_annotate-2.8.4/trunk"
 ### annotation
-BIOR="/bior_2.1.1/bin/"
-BIOR_CATALOGS="/Data/catalog_file"
-BIOR_DRILLS="/Data/drill_file"
-BIOR_PROFILE="/bior_2.1.1/PKG_PROFILE"
+BIOR="bior_pipeline-4.1.1/bin/"
+BIOR_PROFILE="/bior_pipeline-4.1.1/PKG_PROFILE"
 CAVA="/cava-v1.1.1/cava.py"
 CAVA_CONFIG="/cava-v1.1.1/config.txt"
 SNPEFF="/snpEff"
@@ -37,6 +35,6 @@ QUEUE="NA"
 NOTIFICATION_OPTION="a"
 SGE_STACK="10M"
 
-### annotation tool
+### annotation tool parameters
 SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
 
