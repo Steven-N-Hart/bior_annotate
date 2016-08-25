@@ -49,6 +49,8 @@ then
 	set -x
 fi
 
+export PERL5LIB=$PERLLIB:$PERL5LIB
+
 ##################################################################################
 ###
 ###     Setup configurations
@@ -90,7 +92,7 @@ if [ "$table" != "0" ]
 then
 	if [ "$table" == 1 ]
 	then
-		$PERL $DIR/bior_vcf2xls.pl -i $CREATE_DIR/${outname}.vcf -o $CREATE_DIR/${outname}.xls -c $CREATE_DIR/drills.tmp
+		$PERL $DIR/bior_vcf2xls.pl -i $CREATE_DIR/${outname}.vcf -o $CREATE_DIR/${outname}.xls -c $CREATE_DIR/drill.table
 	fi
 	if [ "$table" == 2 ]
 	then
