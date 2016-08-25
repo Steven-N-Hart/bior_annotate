@@ -4,12 +4,13 @@
 WORKFLOW_PATH="/bior_annotate/trunk/scripts"
 BIOR_ANNOTATE_DIR="/bior_annotate/trunk"
 ### annotation
-BIOR="bior_pipeline-4.1.1/bin/"
+BIOR="/bior_pipeline-4.1.1/bin/"
 BIOR_PROFILE="/bior_pipeline-4.1.1/PKG_PROFILE"
 CAVA="/cava-v1.1.1/cava.py"
 CAVA_CONFIG="/cava-v1.1.1/config.txt"
 SNPEFF="/snpEff"
 SNPEFF_DB="GRCh37.74"
+REF_GENOME="/Data/references/hg19.fa"
 
 ### executables
 #SGE="/home/oge/ge2011.11/bin/linux-x64/qsub"

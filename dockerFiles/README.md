@@ -11,10 +11,11 @@ curl -# -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/techni
 bgzip -dc references/hg19.fa.gz > references/hg19.fa
 samtools faidx references/hg19.fa
 
-#Now get the test VCF File
-curl -# -o chr17.1kg.vcf.gz ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
-
+#### Download the `test.vcf` file.
 ```
+wget https://raw.githubusercontent.com/Steven-N-Hart/bior_annotate/master/trunk/test.vcf
+```
+
 #### Get bior catalogs 
 ```
 mkdir catalogs && cd catalogs
@@ -91,12 +92,12 @@ The catalog file tells bior_annotate.sh where the annotation catalogs are locate
 
 Create your own catalog file for the annotation sets you just downloaded by copying & pasting this information:
 `
-ExAC_r03_GRCh37_nodups  bior_same_variant   catalogs/2015_05_18/ExAC.r0.3.sites.vep.vcf.tsv.bgz
-1000genomes_20130502_GRCh37_nodups  bior_same_variant   catalogs/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
-Clinvar_20160515_GRCh37 bior_same_variant   catalogs/ClinVar/20160515_GRCh37/variants_nodups.v1/macarthur-lab_xml_txt.tsv.bgz
-dbSNP139    bior_overlap    catalogs/dbSNP/139/chr17_GRCh37.tsv.bgz
-dbSNP_142_GRCh37p13 bior_overlap    catalogs/dbSNP/142_GRCh37.p13/variants_nodups.v1/chr17.vcf.tsv.bgz
-ESP_V2_GRCh37   bior_same_variant   catalogs/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
+ExAC_r03_GRCh37_nodups  bior_same_variant   /Data/catalogs/2015_05_18/ExAC.r0.3.sites.vep.vcf.tsv.bgz
+1000genomes_20130502_GRCh37_nodups  bior_same_variant   /Data/catalogs/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
+Clinvar_20160515_GRCh37 bior_same_variant   /Data/catalogs/ClinVar/20160515_GRCh37/variants_nodups.v1/macarthur-lab_xml_txt.tsv.bgz
+dbSNP139    bior_overlap    /Data/catalogs/dbSNP/139/chr17_GRCh37.tsv.bgz
+dbSNP_142_GRCh37p13 bior_overlap    /Data/catalogs/dbSNP/142_GRCh37.p13/variants_nodups.v1/chr17.vcf.tsv.bgz
+ESP_V2_GRCh37   bior_same_variant   /Data/catalogs/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
 `
 
 The drill file tells `bior_annotate.sh` what fields need to be extracted from the sources listed in the catalog file.  
@@ -110,10 +111,11 @@ ExAC_r03_GRCh37_nodups  INFO.AC_NFE,INFO.AC
 1000genomes_20130502_GRCh37_nodups  INFO.EUR_AF
 Clinvar_20160515_GRCh37 pathogenic,hgvs_c,hgvs_p
 dbSNP_142_GRCh37p13 INFO.PMC
-ESP_V2_GRCh37   INFO.EA_AC,INFO.EA_AN
+ESP_V2_GRCh37   INFO.EA_AC,ALL._maf
 ```
 You do not need to drill out information from catalogs.  Even though there is a catalog (`dbSNP139`) listed in the catalog file, I don't want any of that information extracted since I have a newer version of dbSNP available(`dbSNP_142_GRCh37p13`). The name in the catalog_file must match the name in the drill_file EXACTLY.         
 
+> Important: Make sure you have these tab seperated instead of spaces!
 
 #### Download the `bior_annoate.sh` [Docker](https://www.docker.com/) Image from [Dockerhub](https://hub.docker.com/r/stevenhart/bior_annotate/)
 This will take several minutes.
@@ -122,17 +124,16 @@ docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -h
 ```
 You'll see the help information as soon as it completes downloading.
 
-#### Download the `test.vcf` file and a `tool_info.txt` that is pre-configured for the docker environment.
-```
-wget https://raw.githubusercontent.com/Steven-N-Hart/bior_annotate/master/trunk/test.vcf
-wget https://github.com/Steven-N-Hart/bior_annotate/blob/master/dockerFiles/tool_info.txt
-```
-> Sometimes GitHub acts funny, so you may need to try multiple times until you get success.
-
 #### Run the demo
 You can use the `test.vcf` provided in your `bior_annotate` directory
 ```
-docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -v test.vcf -c catalogFile.docker -d drillFile.docker -o TEST  
+docker run -it --rm  -v $PWD:/Data -w /Data test bior_annotate.sh -v test.vcf -o OUT -c catalog.file -d drill.file  
 ```
 
+#### Now check out your results
+You should now have 3 output files:
+ * OUT.vcf: The uncompressed & annotated VCF
+ * OUT.vcf.gz: The compressed & annotated VCF
+ * OUT.vcf.gz.tbi: The index file for the compressed VCF
 
+ 
