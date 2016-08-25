@@ -120,7 +120,8 @@ Clinvar_20160515_GRCh37 pathogenic,hgvs_c,hgvs_p
 dbSNP_142_GRCh37p13 INFO.PMC
 ESP_V2_GRCh37   INFO.EA_AC,ALL._maf
 ```
-You do not need to drill out information from catalogs.  Even though there is a catalog (`dbSNP139`) listed in the catalog file, I don't want any of that information extracted since I have a newer version of dbSNP available(`dbSNP_142_GRCh37p13`). The name in the catalog_file must match the name in the drill_file EXACTLY.         
+You do not need to drill out information from all the catalogs in your catalog file.  For example, even though there is a catalog (`dbSNP139`) listed in the catalog file, I don't want any of that information extracted since I have a newer version of dbSNP available(`dbSNP_142_GRCh37p13`). 
+The name in the catalog_file must match the name in the drill_file EXACTLY.         
 
 > Important: Make sure you have these tab seperated instead of spaces!
 
@@ -142,7 +143,7 @@ We need to mount the local directory into a directory called `Data` in the conta
 
 #### Now check out your results
 You should now have 2 output files:
- * OUT.vcf.gz: The compressed & annotated VCF
- * OUT.vcf.gz.tbi: The index file for the compressed VCF
+ * `OUT.vcf.gz`: The compressed & annotated VCF
+ * `OUT.vcf.gz.tbi`: The index file for the compressed VCF
 
 # All done!
