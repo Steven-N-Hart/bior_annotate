@@ -39,7 +39,13 @@ RUN cpan Switch
 # Install htslib
 #####################################################
 RUN git clone https://github.com/samtools/htslib.git 
-RUN cd htslib && make && make install
+RUN cd htslib && make && make install && cd /
+
+#####################################################
+# Install vt
+#####################################################
+RUN git clone https://github.com/atks/vt.git
+RUN cd vt && make && cd /
 
 #####################################################
 # Install BIOR
@@ -99,10 +105,10 @@ ENV PATH=$PATH:/bedtools2/bin
 #####################################################
 # Get bior_annotate
 #####################################################
-RUN wget https://github.com/Steven-N-Hart/bior_annotate/archive/v2.8.4.tar.gz
-RUN tar -xvzf v2.8.4.tar.gz
-RUN rm -f 2.8.4.tar.gz
-ENV PATH=$PATH:/bior_annotate-2.8.4/trunk/
-RUN perl -p -i -e 's/\/data5\/bsi\/bictools\/scripts\/bior_annotate\/trunk\/trunk\//\/bior_annotate-2.8.4\/trunk\//' /bior_annotate-2.8.4/trunk/config/tool_info.txt 
+RUN git clone https://github.com/Steven-N-Hart/bior_annotate.git
+ENV PATH=$PATH:/bior_annotate/trunk/
 
+COPY tool_info.txt /bior_annotate/trunk/config/tool_info.txt
+COPY catalog_file /bior_annotate/trunk/config/catalog_file
+COPY drill_file /bior_annotate/trunk/config/drill_file 
 

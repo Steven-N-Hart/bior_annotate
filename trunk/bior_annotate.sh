@@ -211,8 +211,11 @@ then
   usage
   echo "ERROR: A required input parameter does not exist or the file is empty. Please check for typos."
   echo "CATALOGS=$catalogs"
+  ls -lh $catalogs
   echo "DRILLS=$drills"
+  ls -lh $drills
   echo "VCF=$VCF"
+  ls -lh $VCF
   echo "outname=$outname"
   exit 100
 fi

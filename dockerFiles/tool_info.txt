@@ -2,7 +2,7 @@
 
 
 WORKFLOW_PATH="/bior_annotate/trunk/scripts"
-BIOR_ANNOTATE_DIR="/bior_annotate-2.8.4/trunk"
+BIOR_ANNOTATE_DIR="/bior_annotate/trunk"
 ### annotation
 BIOR="bior_pipeline-4.1.1/bin/"
 BIOR_PROFILE="/bior_pipeline-4.1.1/PKG_PROFILE"
