@@ -2,11 +2,7 @@
 
 
 WORKFLOW_PATH="/bior_annotate/trunk/scripts"
-<<<<<<< HEAD:dockerFiles/tool_info.txt
 BIOR_ANNOTATE_DIR="/bior_annotate/trunk"
-=======
-BIOR_ANNOTATE_DIR="/bior_annotate-2.8.4/trunk"
->>>>>>> 558d7187ccdabb529f658c6d1622ff977fccedb5:dockerFiles/tool_info.txt
 ### annotation
 BIOR="bior_pipeline-4.1.1/bin/"
 BIOR_PROFILE="/bior_pipeline-4.1.1/PKG_PROFILE"
