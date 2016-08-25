@@ -392,8 +392,8 @@ then
 	grep -v 'NON_REF'|\
 	 $PERL -pne 's/[ |\t]$//g'|\
 	$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}'|\
-	$VT/vt normalize -r $REF_GENOME - >${CWD_VCF/.gz/}
-	CWD_VCF=${CWD_VCF/.gz/}
+	$VT/vt normalize -r $REF_GENOME - >${CWD_VCF%%.*}
+	CWD_VCF=${CWD_VCF%%.*}
 else
 	cat $VCF|\
 	$PERL $VCF_SPLIT |\
@@ -422,7 +422,7 @@ then
   exit 100
 fi
 
-cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|grep -v "^#"|split -d -l $NUM -a 3 - ${CWD_VCF/.gz/}
+cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|grep -v "^#"|split -d -l $NUM -a 3 - ${CWD_VCF%%.*}
 
 FIND_RESULTS=`find $TEMPDIR -maxdepth 1 -name "${CWD_VCF}[0-9]*" -print -quit`
 
