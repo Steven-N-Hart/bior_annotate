@@ -10,6 +10,7 @@ mkdir references
 curl -# -o references/hg19.fa.gz ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz 
 bgzip -dc references/hg19.fa.gz > references/hg19.fa
 samtools faidx references/hg19.fa
+```
 
 #### Download the `test.vcf` file.
 
