@@ -28,7 +28,7 @@ FINGER="/usr/bin/finger"
 BEDTOOLS="/bedtools2/bin"
 SAMTOOLS="/samtools/"
 TABIX="/usr/local/bin/"
-
+VT="/vt"
 
 ### queue paramters
 QUEUE="NA"
