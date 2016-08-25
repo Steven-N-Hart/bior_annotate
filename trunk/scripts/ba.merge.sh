@@ -110,7 +110,7 @@ fi
 if [[ "$COMPRESS" == "yes" ]]
 then
   cat $CREATE_DIR/${outname}.vcf|$BEDTOOLS/sortBed -header|uniq |$TABIX/bgzip -c > $CREATE_DIR/${outname}.vcf.gz
-  BEGINNING=`grep -v "^#" $CREATE_DIR/${outname}.vcf|uniq|wc -l`
+  BEGINNING=`grep -v "^#" $CREATE_DIR/${outname}.vcf|BEDTOOLS/sortBed -header|uniq|wc -l`
   FINAL=`zcat  $CREATE_DIR/${outname}.vcf.gz|grep -v "^#"|wc -l`
   if [ $FINAL -lt $BEGINNING ]
   then

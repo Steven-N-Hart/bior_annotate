@@ -134,7 +134,7 @@ docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -h
 You'll see the help information as soon as it completes downloading.
 
 #### Run the demo
-You can use the `test.vcf` provided in your `bior_annotate` directory
+Use the `test.vcf` that you downloaded from before.
 
 ```
 docker run -it --rm  -v $PWD:/Data -w /Data stevenhart/bior_annotate bior_annotate.sh -v test.vcf -o OUT -c catalog.file -d drill.file  
