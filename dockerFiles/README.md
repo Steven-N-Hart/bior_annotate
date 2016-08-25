@@ -1,9 +1,9 @@
-# bior_annotate
+# bior_annotate tutorial
 
 ### Prerequisties
 
-```
 #### Download Reference files (this may take some time depending on your connection speed)
+
 ```
 #Get human reference genome
 mkdir references
@@ -12,11 +12,13 @@ bgzip -dc references/hg19.fa.gz > references/hg19.fa
 samtools faidx references/hg19.fa
 
 #### Download the `test.vcf` file.
+
 ```
 wget https://raw.githubusercontent.com/Steven-N-Hart/bior_annotate/master/trunk/test.vcf
 ```
 
 #### Get bior catalogs 
+
 ```
 mkdir catalogs && cd catalogs
 # Download the 1000 genomes catalog
@@ -38,7 +40,9 @@ done
 #Change back to the home directory
 cd ..
 ```
+
 Your `catalogs` directory should now look like this:
+
 ```
 1000_genomes/
     20130502_GRCh37/
@@ -82,23 +86,24 @@ ESP/
 
 
 #### Configuration
-`bior_annotate.sh` required 2 configuration files: a `catalog.file` and a `drill.file`.
+`bior_annotate.sh` requires 2 configuration files: a `catalog.file` and a `drill.file`.
 
 The catalog file tells bior_annotate.sh where the annotation catalogs are located on your filesystem. 
 
  * column 1 is the ShortUniqueName in the *datasource.properties file for that catalog
- * column 2 is what bior command you wish to run [e.g. overlap or same variant]
+ * column 2 is what bior command you wish to run [e.g. bior_overlap or bior_same_variant]
  * column 3 is the path to the catalog
 
 Create your own catalog file for the annotation sets you just downloaded by copying & pasting this information:
-`
+
+```
 ExAC_r03_GRCh37_nodups  bior_same_variant   /Data/catalogs/2015_05_18/ExAC.r0.3.sites.vep.vcf.tsv.bgz
 1000genomes_20130502_GRCh37_nodups  bior_same_variant   /Data/catalogs/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
 Clinvar_20160515_GRCh37 bior_same_variant   /Data/catalogs/ClinVar/20160515_GRCh37/variants_nodups.v1/macarthur-lab_xml_txt.tsv.bgz
 dbSNP139    bior_overlap    /Data/catalogs/dbSNP/139/chr17_GRCh37.tsv.bgz
 dbSNP_142_GRCh37p13 bior_overlap    /Data/catalogs/dbSNP/142_GRCh37.p13/variants_nodups.v1/chr17.vcf.tsv.bgz
 ESP_V2_GRCh37   bior_same_variant   /Data/catalogs/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
-`
+```
 
 The drill file tells `bior_annotate.sh` what fields need to be extracted from the sources listed in the catalog file.  
 
@@ -106,6 +111,7 @@ The drill file tells `bior_annotate.sh` what fields need to be extracted from th
  * column 2 is what features you want to drill out of that catalog
 
 Create your own drill file for the annotation sets you just downloaded by copying & pasting this information:
+
 ```
 ExAC_r03_GRCh37_nodups  INFO.AC_NFE,INFO.AC
 1000genomes_20130502_GRCh37_nodups  INFO.EUR_AF
@@ -119,6 +125,7 @@ You do not need to drill out information from catalogs.  Even though there is a 
 
 #### Download the `bior_annoate.sh` [Docker](https://www.docker.com/) Image from [Dockerhub](https://hub.docker.com/r/stevenhart/bior_annotate/)
 This will take several minutes.
+
 ```
 docker run -it --rm stevenhart/bior_annotate:latest bior_annotate.sh -h
 ```
@@ -126,14 +133,15 @@ You'll see the help information as soon as it completes downloading.
 
 #### Run the demo
 You can use the `test.vcf` provided in your `bior_annotate` directory
+
 ```
-docker run -it --rm  -v $PWD:/Data -w /Data test bior_annotate.sh -v test.vcf -o OUT -c catalog.file -d drill.file  
+docker run -it --rm  -v $PWD:/Data -w /Data stevenhart/bior_annotate bior_annotate.sh -v test.vcf -o OUT -c catalog.file -d drill.file  
 ```
+We need to mount the local directory into a directory called `Data` in the container (that's the docker `-v $PWD:/Data` parameter) and set the intial container working directory to `Data` (docker `-w /Data` paramter).
 
 #### Now check out your results
-You should now have 3 output files:
- * OUT.vcf: The uncompressed & annotated VCF
+You should now have 2 output files:
  * OUT.vcf.gz: The compressed & annotated VCF
  * OUT.vcf.gz.tbi: The index file for the compressed VCF
 
- 
+# All done!
