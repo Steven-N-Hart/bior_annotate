@@ -118,6 +118,7 @@ then
     exit 100
   fi
   $TABIX/tabix -f -p vcf $CREATE_DIR/${outname}.vcf.gz
+  rm $CREATE_DIR/${outname}.vcf
 else
   log_debug "Not compressing final file due to runtime option. Tabix index will also not be generated."
 fi
