@@ -1,0 +1,6 @@
+ExAC_r03_GRCh37_nodups  bior_same_variant   catalogs/2015_05_18/ExAC.r0.3.sites.vep.vcf.tsv.bgz
+1000genomes_20130502_GRCh37_nodups  bior_same_variant   catalogs/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
+Clinvar_20160515_GRCh37 bior_same_variant   catalogs/ClinVar/20160515_GRCh37/variants_nodups.v1/macarthur-lab_xml_txt.tsv.bgz
+dbSNP139    bior_overlap    catalogs/dbSNP/139/chr17_GRCh37.tsv.bgz
+dbSNP_142_GRCh37p13 bior_overlap    catalogs/dbSNP/142_GRCh37.p13/variants_nodups.v1/chr17.vcf.tsv.bgz
+ESP_V2_GRCh37   bior_same_variant   catalogs/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
