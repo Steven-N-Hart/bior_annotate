@@ -172,6 +172,9 @@ sub readLine(){
 sub usage{
 	print "
 	CompoundHet.pl -v <vcf> -p <pedFile>
+                -e	limit to effect [HIGH|MODERATE]
+                -f	frequency at which to filter variants [0.05]
+                -l	verbose output (debugging)
 
 ";
 exit 1;

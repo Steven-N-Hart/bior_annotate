@@ -121,7 +121,7 @@ then
   if [[ $DRILLS == *ExAC* ]]; 
   then 
     echo "$PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE >  $CWD_VCF.tmp"
-    $PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE >  $CWD_VCF.tmp
+    $PERL $INHERITANCE -v $CWD_VCF -p $PEDIGREE $GENE_LIST|$PERL $COMPOUNDHET -v - -p $PEDIGREE $CH_OPTIONS >  $CWD_VCF.tmp
     END_NUM=`egrep -v "^#|^$" ${CWD_VCF}.tmp |wc -l|cut -f1 -d" "`
     if [ ! "$END_NUM" -ge "$START_NUM" ];
     then 

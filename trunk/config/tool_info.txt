@@ -34,6 +34,9 @@ SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
 VT="/data5/bsi/bictools/src/vt/2016_03_24/"
 VT_OPTIONS=""
 
+#Compound het options
+CH_OPTIONS=""
+
 # Default queue for bior_annotate
 QUEUE="1-day"
 
