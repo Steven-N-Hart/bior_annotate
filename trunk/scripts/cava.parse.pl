@@ -20,7 +20,7 @@ while (<>){
 		s/##INFO=<ID=ALTSO,/##INFO=<ID=CAVA_ALTSO,/;
 		s/##INFO=<ID=DBSNP,/##INFO=<ID=CAVA_DBSNP,/;
 		s/##INFO=<ID=TYPE,/##INFO=<ID=CAVA_TYPE,/;
-		s/,Source="CAVA",Version=\"1.0.0\"//;
+		s/,Source="CAVA",Version=\"[0-9]+.[0-9]+.[0-9]+\"//;
 		print $_."\n";
 		next;
 	}
