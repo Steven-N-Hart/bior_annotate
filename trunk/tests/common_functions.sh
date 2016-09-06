@@ -80,7 +80,7 @@ call_bior_annotate() {
 
   if [ -z "$INPUT_VCF" ]
   then
-    local INPUT_VCF="$BIOR_ANNOTATE/test.vcf"
+    local INPUT_VCF="$BIOR_ANNOTATE/test_with_chr.vcf"
   fi
 
   if [ -z "$MEMORY_INFO" ]
