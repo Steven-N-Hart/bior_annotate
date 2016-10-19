@@ -22,7 +22,7 @@ REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
 CAVA=/data5/bsi/bictools/src/cava/1.1.1.mayo/cava.py
 CAVA_CONFIG=/data5/bsi/epibreast/m087494.couch/Couch/Huge_Breast_VCF/cava_config.txt
 
-BIOR="/usr/local/biotools/bior_scripts/2.4.1/bior_pipeline-2.4.1/bin"
+BIOR="/usr/local/biotools/bior_scripts/2.4.2/bior_pipeline-2.4.2/bin"
 BIOR_PROFILE=${BIOR}/../../PKG_PROFILE
 TABIX=/projects/bsi/bictools/apps/alignment/tabix/0.2.5
 BEDTOOLS=/projects/bsi/bictools/apps/misc/BEDTools/2.16.2/bin
