@@ -92,12 +92,12 @@ if [ "$table" != "0" ]
 then
 	if [ "$table" == 1 ]
 	then
-		$PERL $DIR/bior_vcf2xls.pl -i $CREATE_DIR/${outname}.vcf -o $CREATE_DIR/${outname}.xls -c $CREATE_DIR/drill.table
+		$PERL $DIR/bior_vcf2xls.pl -i $CREATE_DIR/${outname}.vcf -o $CREATE_DIR/${outname}.tsv -c $CREATE_DIR/drill.table
 	fi
 	if [ "$table" == 2 ]
 	then
 		DRILLS=`cat $CREATE_DIR/drills.tmp|tr "\n" ","`
-		$PERL $DIR/Info_extract2.pl $CREATE_DIR/${outname}.vcf -q $DRILLS|grep -v "^##" >  $CREATE_DIR/${outname}.xls
+		$PERL $DIR/Info_extract2.pl $CREATE_DIR/${outname}.vcf -q $DRILLS|grep -v "^##" >  $CREATE_DIR/${outname}.tsv
 	fi
 fi	
 
