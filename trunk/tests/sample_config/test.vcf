@@ -114,6 +114,7 @@
 ##contig=<ID=chrGL000192.1,length=547496>
 ##reference=file:///data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa
 ##source=PhaseByTransmission
+##SAMPLE=<ID=s_P1140__Tumor,SampleName=s_P1140__Tumor,File=/data2/delivery/Stewart_Keith_m009587/160610_K00203_0045_BHCL3GBBXX/secondary/160714-WG-KS/variants/MuTect/../../bam/s_P1140__Tumor.bam>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA12878	NA12891	NA12892	somthingelse12878	somthingelse12891	somthingelse12892
 chr1	54714	.	TTCTTTCTTTC	*	6686.10	.	AC=14;AF=0.194;AN=72;BaseQRankSum=0.192;ClippingRankSum=0.758;DP=1245;FS=0.422;InbreedingCoeff=0.1882;MLEAC=14;MLEAF=0.194;MQ=62.82;MQRankSum=1.45;QD=19.05;ReadPosRankSum=0.156;SOR=0.660	GT:AD:DP:GQ:PGT:PID:PL	./.:4,0:4	0/0:6,0:6:0:.:.:0,0,47	./.:5,0:5	./0:14,0:35:99:.:.:728,770,1304	0/0:24,0:24:0:.:.:0,0,505	0/1:18,16:34:99:.:.:613,0,705
 chr1	54715	.	TC	*	5764.59	.	AC=19;AF=0.257;AN=74;BaseQRankSum=1.52;ClippingRankSum=0.193;DP=1228;FS=2.963;InbreedingCoeff=0.2122;MLEAC=21;MLEAF=0.284;MQ=59.95;MQRankSum=-1.733e+00;QD=17.85;ReadPosRankSum=0.578;SOR=0.860	GT:AD:DP:GQ:PGT:PID:PL	./.:4,0:4	0/0:6,0:6:0:.:.:0,0,47	./.:5,0:5	0/1:21,6:27:99:.:.:189,0,752	0/0:24,0:24:12:.:.:0,12,180	0/1:18,16:34:99:.:.:613,0,705
