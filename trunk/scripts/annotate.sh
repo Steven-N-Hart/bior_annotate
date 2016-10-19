@@ -97,12 +97,16 @@ do
     exit 100
   fi
 
+  log "Attempting to annotate VCF"
+
   cat $VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/$CATALOG_COMMAND -d $CATALOG -l | eval ${BIOR}/bior_drill ${drill_opts} | ${BIOR}/bior_tjson_to_vcf -l > $CWD_VCF.$count
 
   START_NUM=`cat $VCF | grep -v '^#' | wc -l`
   END_NUM=`cat $CWD_VCF.$count | grep -v '^#' | wc -l`
   if [[ ! -s $CWD_VCF.${count} || ! $END_NUM -ge $START_NUM ]]
   then
+    log_error "Attempting to execute: cat $VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/$CATALOG_COMMAND -d $CATALOG -l | eval ${BIOR}/bior_drill ${drill_opts} | ${BIOR}/bior_tjson_to_vcf -l > $CWD_VCF.$count"
+    log_error "`which java`"
     ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $CWD_VCF.${count} -m annotate.sh -M "bior annotation failed using $CATALOG_FILE" -p $VCF -l $LINENO
     exit 100
   fi

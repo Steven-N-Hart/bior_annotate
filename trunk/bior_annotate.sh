@@ -415,7 +415,7 @@ then
 fi
 
 #SPLIT the VCF files into maneageable chunks
-cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "^#" >  ${CWD_VCF}.header
+cat $CWD_VCF|$PERL -pne 's/[ |\t]$//g'|head -1000|grep "^#" | grep -v "##SAMPLE" >  ${CWD_VCF}.header
 if [ ! -s "${CWD_VCF}.header" ]
 then
   log_error "Failed to generate header for VCF, check $CWD_VCF to ensure the file exists and is formatted correctly."
@@ -451,7 +451,7 @@ if [ "$QUEUE" == "NA" ]
 then
 	for x in ${CWD_VCF}[0-9][0-9][0-9]
 	do
-
+		log "sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x"
 		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
     log ""
 		log_dev "$SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}" 
