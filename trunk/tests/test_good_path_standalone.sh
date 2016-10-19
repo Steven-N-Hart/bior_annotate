@@ -47,7 +47,7 @@ source "$BIOR_ANNOTATE/tests/common_functions.sh"
 PRINT_LEVEL="debug"
 
 # For debug, uncomment this line:
-#DEBUG="TRUE"
+DEBUG="TRUE"
 
 ### Begin test functions
 
