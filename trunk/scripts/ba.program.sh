@@ -152,7 +152,7 @@ then
   echo "$DRILLS"|tr ";" "\n"|awk '($1)' > drill.table	
   if [ "$runsnpeff" == "TRUE" ]
   then 
-    echo -e "snpeff.Gene_name\nsnpeff.Amino_acid_change\nsnpeff.Transcript\nsnpeff.Exon\nsnpeff.Effect\nsnpeff.Effect_impact\nsnpeff.Amino_acid_change\nsnpeff.Codon_change" >> drill.table
+    echo -e "snpeff.Gene_Name\nsnpeff.Amino_Acid_Change\nsnpeff.Transcript_ID\nsnpeff.Exon_Rank\nsnpeff.Effect_Impact\nsnpeff.Codon_Change" >> drill.table
   fi
 
   if [ "$runCAVA" == "TRUE" ];

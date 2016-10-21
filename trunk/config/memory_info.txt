@@ -5,6 +5,8 @@ annotate_ba_mem="12G"
 annotate_ba_merge="8G"
 bior_annotate_mem="1G"
 
+snpeff_mem="4G"
+
 ## SGE
 SGE_STACK="10M"
 
