@@ -203,16 +203,16 @@ validate_good_path_table() {
   call_bior_annotate $TEST_DIR
 
   # Test whether expected files were created
-  file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi $TEST_DIR/test_out.xls"
+  file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi $TEST_DIR/test_out.tsv"
   RETURN_CODE=$? 
 
   if [ "$RETURN_CODE" == "0" ]
   then
     # If all of the columns have the same number of fields, the output is probably correct 
-    COLS_EQUAL=`awk -F'\t' '{print NF;}' $TEST_DIR/test_out.xls | sort -n | uniq | wc -l`
+    COLS_EQUAL=`awk -F'\t' '{print NF;}' $TEST_DIR/test_out.tsv | sort -n | uniq | wc -l`
     if [ ! "$COLS_EQUAL" == "1" ]
     then
-      log_error "number of columns varies in table output. Command to recreate: awk -F'\t' '{print NF;}' $TEST_DIR/test_out.xls | sort -n | uniq | wc -l"
+      log_error "number of columns varies in table output. Command to recreate: awk -F'\t' '{print NF;}' $TEST_DIR/test_out.tsv | sort -n | uniq | wc -l"
       RETURN_CODE="10"
     fi
   fi
