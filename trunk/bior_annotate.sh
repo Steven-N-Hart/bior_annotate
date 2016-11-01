@@ -47,6 +47,7 @@ cat << EOF
 ##      -T    tool info file
 ##      -x    path to temp directory [default: cwd]
 ##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
+##	-u    only report 1 row for each chr, pos, ref, alt (use with extreme caution)
 ##
 ##
 ##	Clinical specific options (DLMP use only)
@@ -93,6 +94,7 @@ NUM=20000
 log="FALSE"
 COMPRESS="yes"
 KEEP_LINKS="TRUE"
+uniqOption=""
 
 ##################################################################################
 ###
@@ -101,7 +103,7 @@ KEEP_LINKS="TRUE"
 ##################################################################################
 
 
-while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
+while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:uv:x:z:" OPTION; do
   case $OPTION in
     a)  runCAVA="" ;;
     c)  catalogs=$OPTARG ;;     #
@@ -124,6 +126,7 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
     Q)  QUEUEOVERRIDE=$OPTARG ;; #
     t)  table=$OPTARG ;;           #
     T)  tool_info=$OPTARG ;;     #
+    u)  uniqOption="-u" ;;
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
     z)  if [[ "$OPTARG" == "yes" || "$OPTARG" == "no" ]]
@@ -458,7 +461,7 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
-  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS"
+  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS ${uniqOption}"
   log $COMMAND
   eval $COMMAND
 
@@ -524,7 +527,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	log "$args -hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
+	log "$args -hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR ${uniqOption}"
 		LOG="-l"
 fi
 
@@ -537,7 +540,7 @@ then
 		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 	fi
 else
-	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
+	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} ${uniqOption}"
 
 fi	
 eval "$command -L $KEEP_LINKS" 

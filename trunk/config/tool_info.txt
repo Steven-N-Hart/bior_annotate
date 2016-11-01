@@ -2,7 +2,7 @@
 
 #BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/"
 #BIOR_ANNOTATE_DIR="/home/m110872/workspace/bior_annotate/trunk/"
-BIOR_ANNOTATE_DIR="/data5/bsi/bictools/scripts/bior_annotate/trunk/trunk/"
+BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk"
 
 SGE_BASE="/home/oge/ge2011.11/bin/linux-x64/"
 PERL="/usr/local/biotools/perl/5.16.2-centos6/bin/perl"
