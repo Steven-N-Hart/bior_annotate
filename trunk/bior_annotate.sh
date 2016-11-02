@@ -157,6 +157,7 @@ fi
 ###     Setup configurations
 ###
 ##################################################################################
+
 if [ -z "$tool_info" ]
 then
 	#If the user doesn't specify a Tool info, try to find the default location
@@ -311,6 +312,33 @@ export SCRIPT_DIR=${BIOR_ANNOTATE_DIR}/scripts
 if [ ! -d "$SCRIPT_DIR" ]; then
   log_error "Variable not set correctly SCRIPT_DIR=$SCRIPT_DIR"
   exit 100
+fi
+
+#As of version 3.0, we only support CAVA VERSION 1.2+
+CAVA_VERSION=$($PYTHON/python $CAVA --version)
+#Make sure the version is greater than v1.1
+CAVA_VALID=$(echo $CAVA_VERSION|perl -ne 's/v//;@ver=split(/\./,$_);if(($ver[0]<=1)&&($ver[1]<=1)){print "NOT OKAY"}')
+if [ -z "$CAVA_VERSION" -o ! -z "$CAVA_VALID" ]
+then
+	echo "Please check that your CAVA version is at least 1.2+"
+	echo "We no longer support CAVA <=v1.1"
+	exit 100
+fi
+#Check the database to make sure it is in the proper format, since 1.1 databases won't work
+CAVA_DB=$(grep ensembl $CAVA_CONFIG |awk '{print $3}' )
+if [ -z "$CAVA_DB" ]
+then
+	echo "You either do not have a database set in your cava config ($CAVA_CONFIG) or"
+	echo "You do not have a space here: @ensembl = /path/to/ensembl"
+	exit 100
+fi
+#In cava 1.2+, the 4th column contains transcript info, which should contain the term "kb"
+COLUMN_4=$(zcat $CAVA_DB|head -1|cut -f4)
+if [[ $COLUMN_4 != *"kb"* ]]
+then 
+	echo "Please ensure that your cava database is compatible with cava version v1.2+."
+	echo "To verify, the 4th column in your ensembl file should contain \"kb\""
+	exit 100
 fi
 
 

@@ -15,7 +15,7 @@ VAR=$(readlink -f $0)
 echo "$VAR"
 KEEP_LINKS="FALSE"
 uniqueOption="FALSE"
-set -x
+
 while getopts "uh:L:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
   case $OPTION in
     c) catalogs=$OPTARG ;;
