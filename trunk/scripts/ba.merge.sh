@@ -12,9 +12,8 @@ echo "Options specified: $@"
 
 KEEP_LINKS="FALSE"
 
-while getopts "h:L:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
+while getopts "h:L:vo:t:T:d:r:e:l:D:O:z:" OPTION; do
   case $OPTION in
-    c) catalogs=$OPTARG ;;
     d) CREATE_DIR=$OPTARG ;;
     D) DIR=$OPTARG ;;
     e) editLabel=$OPTARG ;;
