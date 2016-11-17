@@ -75,7 +75,7 @@ validate_good_path() {
 
   # Call bior_annotate.sh
   QUEUE="NA"
-  call_bior_annotate $TEST_DIR
+  call_bior_annotate $TEST_DIR 2>&1 >>  $TEST_DIR/logs
 
   # Test whether expected files were created
   file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi"
@@ -110,7 +110,7 @@ validate_good_path_no_compression() {
   # Call bior_annotate.sh
   QUEUE="NA"
   COMPRESS="no"
-  call_bior_annotate $TEST_DIR
+  call_bior_annotate $TEST_DIR 2>&1 >>  $TEST_DIR/logs
 
   # Test whether expected files were created
   file_list_validation "$TEST_DIR/test_out.vcf"
@@ -199,7 +199,7 @@ validate_good_path_table() {
 
   # Call bior_annotate.sh
   QUEUE="NA"
-  call_bior_annotate $TEST_DIR
+  call_bior_annotate $TEST_DIR 2>&1 >>  $TEST_DIR/logs
 
   # Test whether expected files were created
   file_list_validation "$TEST_DIR/test_out.vcf.gz $TEST_DIR/test_out.vcf.gz.tbi $TEST_DIR/test_out.tsv"
@@ -254,7 +254,6 @@ do
 done
 
 print_summary
-
-rmdir -v "$TEST_DIR"
+rm -fr "$TEST_DIR"
 
 exit $EXIT_CODE

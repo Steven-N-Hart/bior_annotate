@@ -4,15 +4,19 @@
 ###     Parse Argument variables
 ###
 ##################################################################################
-
+usage(){
+VAR=$(readlink -f $0)
+echo "$VAR"
+}
 echo ""
 echo "Running ba.merge"
-echo "Options specified: $@"| tr "-" "\n"
 echo "Options specified: $@"
-
+VAR=$(readlink -f $0)
+echo "$VAR"
 KEEP_LINKS="FALSE"
+uniqueOption="FALSE"
 
-while getopts "h:L:vo:t:T:d:r:e:l:D:O:z:" OPTION; do
+while getopts "uh:L:vo:t:T:d:r:e:l:D:O:z:" OPTION; do
   case $OPTION in
     d) CREATE_DIR=$OPTARG ;;
     D) DIR=$OPTARG ;;
@@ -26,6 +30,7 @@ while getopts "h:L:vo:t:T:d:r:e:l:D:O:z:" OPTION; do
     r) drill=$OPTARG ;;
     t) table=$OPTARG ;;
     T) tool_info=$OPTARG ;;
+	u) uniqueOption="TRUE" ;;
     v) echo "WARNING: option -v is deprecated." ;;
     z) COMPRESS=$OPTARG ;;
    \?) echo "Invalid option: -$OPTARG. See output file for usage." >&2
@@ -75,16 +80,17 @@ then
 fi
 if [ ${PRECWD_VCF: -3} == "000" ]
 then
-        #Add the header from the first file
+    #Add the header from the first file
 	echo "##fileformat=VCFv4.1" > $CREATE_DIR/${outname}.vcf
-         head -500 $x | grep "^##"|sort -u |$PERL -pne 's/$editLabel//g;s/\t\n/\n/' >> $CREATE_DIR/${outname}.vcf
-        #head -500 $x|grep "^##" >> ${outname}.vcf
-        tail -n1 ${PRECWD_VCF%???}.header >> $CREATE_DIR/${outname}.vcf
-        cat $x|grep -v "^#"|$PERL -pne 's/\t\n/\n/;s/==/=/g;s/\t;/\t/'|$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N";$count=0};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";$count++}END{print STDERR "Found $count unique records\n"}' |uniq >> $CREATE_DIR/${outname}.vcf
-else
-        # Get the variants only
-        cat $x|grep -v "^#" | $PERL -pne 's/$editLabel//g;s/\t\n/\n/g;s/==/=/g;s/\t;/\t/' |$PERL -ne 'BEGIN{$chr="chr";$pos=0;$ref="N";$alt="N"};if($_=~/^#/){print}else{chomp; ($CHR,$POS,$ID,$REF,$ALT,@LINE)=split("\t",$_); next if($CHR==$chr && $POS==$pos && $REF eq $ref && $ALT eq $alt &&!(eof)); $chr=$CHR;$pos=$POS;$ref=$REF;$alt=$ALT; print "$_\n";}' |uniq >> $CREATE_DIR/${outname}.vcf
+    head -500 $x | grep "^##"|sort -u |$PERL -pne 's/$editLabel//g;s/\t\n/\n/' >> $CREATE_DIR/${outname}.vcf
+    tail -n1 ${PRECWD_VCF%???}.header >> $CREATE_DIR/${outname}.vcf
 fi
+if [ "$uniqueOption" == "TRUE" ]
+	then
+		cat $x |$PERL ${BIOR_ANNOTATE_DIR}/scripts/MakeUniq.pl |uniq >> $CREATE_DIR/${outname}.vcf
+	else
+		cat $x|uniq >> $CREATE_DIR/${outname}.vcf
+	fi
 done
 
 if [ "$table" != "0" ]

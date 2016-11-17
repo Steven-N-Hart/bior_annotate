@@ -47,6 +47,7 @@ cat << EOF
 ##      -T    tool info file
 ##      -x    path to temp directory [default: cwd]
 ##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
+##	-u    only report 1 row for each chr, pos, ref, alt (use with extreme caution)
 ##
 ##
 ##	Clinical specific options (DLMP use only)
@@ -93,6 +94,7 @@ NUM=20000
 log="FALSE"
 COMPRESS="yes"
 KEEP_LINKS="TRUE"
+uniqOption=""
 
 ##################################################################################
 ###
@@ -101,7 +103,7 @@ KEEP_LINKS="TRUE"
 ##################################################################################
 
 
-while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
+while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:uv:x:z:" OPTION; do
   case $OPTION in
     a)  runCAVA="" ;;
     c)  catalogs=$OPTARG ;;     #
@@ -124,6 +126,7 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:v:x:z:" OPTION; do
     Q)  QUEUEOVERRIDE=$OPTARG ;; #
     t)  table=$OPTARG ;;           #
     T)  tool_info=$OPTARG ;;     #
+    u)  uniqOption="-u" ;;
     v)  VCF=$OPTARG ;;           #
     x)  TEMPDIR=$OPTARG ;;       #
     z)  if [[ "$OPTARG" == "yes" || "$OPTARG" == "no" ]]
@@ -154,6 +157,7 @@ fi
 ###     Setup configurations
 ###
 ##################################################################################
+
 if [ -z "$tool_info" ]
 then
 	#If the user doesn't specify a Tool info, try to find the default location
@@ -310,6 +314,33 @@ if [ ! -d "$SCRIPT_DIR" ]; then
   exit 100
 fi
 
+#As of version 3.0, we only support CAVA VERSION 1.2+
+CAVA_VERSION=$($PYTHON/python $CAVA --version)
+#Make sure the version is greater than v1.1
+CAVA_VALID=$(echo $CAVA_VERSION|perl -ne 's/v//;@ver=split(/\./,$_);if(($ver[0]<=1)&&($ver[1]<=1)){print "NOT OKAY"}')
+if [ -z "$CAVA_VERSION" -o ! -z "$CAVA_VALID" ]
+then
+	echo "Please check that your CAVA version is at least 1.2+"
+	echo "We no longer support CAVA <=v1.1"
+	exit 100
+fi
+#Check the database to make sure it is in the proper format, since 1.1 databases won't work
+CAVA_DB=$(grep ensembl $CAVA_CONFIG |awk '{print $3}' )
+if [ -z "$CAVA_DB" ]
+then
+	echo "You either do not have a database set in your cava config ($CAVA_CONFIG) or"
+	echo "You do not have a space here: @ensembl = /path/to/ensembl"
+	exit 100
+fi
+#In cava 1.2+, the 4th column contains transcript info, which should contain the term "kb"
+COLUMN_4=$(zcat $CAVA_DB|head -1|cut -f4)
+if [[ $COLUMN_4 != *"kb"* ]]
+then 
+	echo "Please ensure that your cava database is compatible with cava version v1.2+."
+	echo "To verify, the 4th column in your ensembl file should contain \"kb\""
+	exit 100
+fi
+
 
 INFO_PARSE=${SCRIPT_DIR}/Info_extract2.pl
 VCF_SPLIT=${SCRIPT_DIR}/VCF_split.pl
@@ -458,7 +489,7 @@ then
 		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
 	done
   log ""
-  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS"
+  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS ${uniqOption}"
   log $COMMAND
   eval $COMMAND
 
@@ -524,7 +555,7 @@ done
 #hold="-hold_jid baProgram"
 if [ "$log" == "TRUE" ]
 then
-	log "$args -hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR"
+	log "$args -hold_jid baProgram -l h_vmem=$annotate_ba_merge -pe threaded 2 -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${CURRENT_LOCATION} -o ${outname} -T $tool_info -r $drills -s $runsnpEff  -D $SCRIPT_DIR ${uniqOption}"
 		LOG="-l"
 fi
 
@@ -537,7 +568,7 @@ then
 		command=$"$args $hold -l h_vmem=$annotate_ba_merge -N $job_name.baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
 	fi
 else
-	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS}"
+	command=$"$args $hold -l h_vmem=$annotate_ba_merge -N baMerge $SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} ${uniqOption}"
 
 fi	
 eval "$command -L $KEEP_LINKS" 

@@ -1,8 +1,6 @@
 #If you have any defaults you want to override, specify them below this line
 
-#BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/"
-#BIOR_ANNOTATE_DIR="/home/m110872/workspace/bior_annotate/trunk/"
-BIOR_ANNOTATE_DIR="/data5/bsi/bictools/scripts/bior_annotate/trunk/trunk/"
+BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk"
 
 SGE_BASE="/home/oge/ge2011.11/bin/linux-x64/"
 PERL="/usr/local/biotools/perl/5.16.2-centos6/bin/perl"
@@ -19,8 +17,8 @@ REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
 
 
 #Tools and their configurations
-CAVA=/data5/bsi/bictools/src/cava/1.1.1.mayo/cava.py
-CAVA_CONFIG=/data5/bsi/epibreast/m087494.couch/Couch/Huge_Breast_VCF/cava_config.txt
+CAVA=/data5/bsi/epibreast/m087494.couch/Scripts/CAVA/cava.py
+CAVA_CONFIG=/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/config/cava_config.txt
 
 BIOR="/usr/local/biotools/bior_scripts/2.4.2/bior_pipeline-2.4.2/bin"
 BIOR_PROFILE=${BIOR}/../../PKG_PROFILE
@@ -32,11 +30,11 @@ SNPEFF_DB="GRCh37.74"
 SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
 
 VT="/data5/bsi/bictools/src/vt/2016_03_24/"
-VT_OPTIONS=""
+VT_OPTIONS="-q"
 
 #Compound het options
 CH_OPTIONS=""
 
 # Default queue for bior_annotate
-QUEUE="1-day"
+QUEUE="NA"
 
