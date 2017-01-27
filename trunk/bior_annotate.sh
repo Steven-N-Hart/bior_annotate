@@ -432,7 +432,6 @@ else
 	$PERL -pne 's/[ |\t]$//g'|\
 	$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' |\
 	$VT/vt normalize $VT_OPTIONS -r $REF_GENOME - > $CWD_VCF
-	exit
 fi
 
 if [ "$CLINICAL" == "TRUE" ]

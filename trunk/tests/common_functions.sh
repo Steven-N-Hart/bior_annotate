@@ -17,6 +17,7 @@ NUM_FAILED="0"
 source "$BIOR_ANNOTATE/utils/file_validation.sh"
 source "$BIOR_ANNOTATE/utils/log.sh"
 
+
 ### Functions defined in this file (alphabetic order):
 # call_bior_annotate
 # cleanup_test
@@ -80,7 +81,7 @@ call_bior_annotate() {
 
   if [ -z "$INPUT_VCF" ]
   then
-    local INPUT_VCF="$BIOR_ANNOTATE/test_with_chr.vcf"
+    local INPUT_VCF="$BIOR_ANNOTATE/tests/test_with_chr.vcf"
   fi
 
   if [ -z "$MEMORY_INFO" ]
@@ -285,7 +286,7 @@ setup_inputs() {
 
   if [ -z "$TEST_VCF" ]
   then
-    TEST_VCF="$BIOR_ANNOTATE/test.vcf"
+    TEST_VCF="$BIOR_ANNOTATE/tests/test.vcf"
   fi
   
   if [ -z "$TOOL_INFO" ]
