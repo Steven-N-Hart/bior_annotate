@@ -20,7 +20,7 @@ REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
 CAVA=/data5/bsi/epibreast/m087494.couch/Scripts/CAVA/cava.py
 CAVA_CONFIG=/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/config/cava_config.txt
 
-BIOR="/usr/local/biotools/bior_scripts/2.4.2/bior_pipeline-2.4.2/bin"
+BIOR="/usr/local/biotools/bior_scripts/4.1.2/bior_pipeline-4.1.2/bin"
 BIOR_PROFILE=${BIOR}/../../PKG_PROFILE
 TABIX=/projects/bsi/bictools/apps/alignment/tabix/0.2.5
 BEDTOOLS=/projects/bsi/bictools/apps/misc/BEDTools/2.16.2/bin
@@ -30,7 +30,7 @@ SNPEFF_DB="GRCh37.74"
 SNPEFF_params=" -noStats -canon -hgvs -lof -noLog "
 
 VT="/data5/bsi/bictools/src/vt/2016_03_24/"
-VT_OPTIONS="-q"
+VT_OPTIONS=-qnm
 
 #Compound het options
 CH_OPTIONS=""
