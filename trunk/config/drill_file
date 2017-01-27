@@ -5,5 +5,3 @@ dbSNP_142_GRCh37p13	ID
 dbNSFP_v3a_GRCh37	CaddPhred,LrtPred,MetalrPred,MetalrRankscore,MetasvmRankscore,Polyphen2HdivPred,Polyphen2HdivRankscore,ProveanConvertedRankscore,ProveanPred,SiftConvertedRankscore,SiftPred,Vest3Rankscore
 ESP_V2_GRCh37	ALL._maf,AA._maf,EA._maf
 1000genomes_20130502_GRCh37_nodups	INFO.AFR_AF,INFO.AMR_AF,INFO.AC,INFO.AN
-BlatED	ED
-OMIM_phenotypes	name

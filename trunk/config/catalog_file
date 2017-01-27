@@ -5,5 +5,3 @@ dbSNP_142_GRCh37p13	bior_same_variant	/data5/bsi/catalogs/bior/v1/dbSNP/142_GRCh
 dbNSFP_v3a_GRCh37	bior_same_variant	/data5/bsi/catalogs/bior/v1/dbNSFP/3.0a_GRCh37/variants_nodups.v1/dbNSFPv3.0a.zip.tsv.bgz
 ESP_V2_GRCh37	bior_same_variant	/data5/bsi/catalogs/bior/v1/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
 1000genomes_20130502_GRCh37_nodups	bior_same_variant	/data5/bsi/catalogs/bior/v1/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
-BlatED	bior_overlap	/data5/bsi/catalogs/user/v1/BLAT_ED/BlatED50.tsv.bgz
-OMIM_phenotypes	bior_overlap	/data5/bsi/catalogs/user/v1/OMIM/2015_10_16/OMIM.10_16_15.tsv.bgz
