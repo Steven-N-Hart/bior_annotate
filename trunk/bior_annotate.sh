@@ -93,7 +93,7 @@ TEMPDIR=$PWD
 NUM=20000
 log="FALSE"
 COMPRESS="yes"
-KEEP_LINKS="TRUE"
+LINKOFF=" -L "
 uniqOption=""
 
 ##################################################################################
@@ -116,7 +116,7 @@ while getopts "ac:Cd:e:g:hj:k:lLM:n:o:O:P:sQ:t:T:uv:x:z:" OPTION; do
     j)  job_name=$OPTARG ;;     #
     k)  job_suffix=$OPTARG ;;
     l)  log="TRUE" ;;           #
-    L)  keepLinks="TRUE" ;;      #
+    L)  LINKOFF="" ;;      #
     M)  memory_info=$OPTARG ;; #
     n)  NUM=$OPTARG ;;       #
     o)  outname=$OPTARG ;;   #
@@ -432,6 +432,7 @@ else
 	$PERL -pne 's/[ |\t]$//g'|\
 	$PERL -ne 'if($_!~/^#/){$_=~s/ //g;@line=split("\t",$_);$rsID=".";print join("\t",@line[0..1],$rsID,@line[3..@line-1])}else{print}' |\
 	$VT/vt normalize $VT_OPTIONS -r $REF_GENOME - > $CWD_VCF
+	exit
 fi
 
 if [ "$CLINICAL" == "TRUE" ]
@@ -486,10 +487,10 @@ then
 		sh $SCRIPT_DIR/annotate.sh -c $catalogs -d $drills -T $tool_info -v $x
     log ""
 		log_dev "$SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}" 
-		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params}
+		sh $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} ${bior_annotate_params} ${LINKOFF}
 	done
   log ""
-  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} -L $KEEP_LINKS ${uniqOption}"
+  COMMAND="$SCRIPT_DIR/ba.merge.sh -t ${table} -d ${TEMPDIR} -O ${outdir} -o ${outname} -T ${tool_info} -r ${drills} -D ${SCRIPT_DIR} -l ${log} -z ${COMPRESS} ${uniqOption}"
   log $COMMAND
   eval $COMMAND
 
@@ -539,14 +540,14 @@ do
 	then
 		if [ "$job_suffix" ]
 		then
-			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram.$job_suffix $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
+			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram.$job_suffix $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params ${LINKOFF}"
 			hold="-hold_jid $job_name.baProgram.$job_suffix"
 		else
-			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
+			command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N $job_name.baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params ${LINKOFF}"
 			hold="-hold_jid $job_name.baProgram"
 		fi
 	else
-		command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params"
+		command=$"$args -hold_jid $JOB1 -l h_vmem=$annotate_ba_mem -N baProgram $SCRIPT_DIR/ba.program.sh -v ${x}.anno -d ${drills} -M ${memory_info} -D ${SCRIPT_DIR} -T ${tool_info} -t ${table} -l ${log} ${PROGRAMS} -j ${INFO_PARSE} ${runsnpEff} ${runCAVA} ${PEDIGREE} ${GENE_LIST} $bior_annotate_params ${LINKOFF}"
 		hold="-hold_jid baProgram"
 	fi	
 	eval "$command"

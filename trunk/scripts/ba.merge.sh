@@ -13,10 +13,9 @@ echo "Running ba.merge"
 echo "Options specified: $@"
 VAR=$(readlink -f $0)
 echo "$VAR"
-KEEP_LINKS="FALSE"
 uniqueOption="FALSE"
 
-while getopts "uh:L:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
+while getopts "uh:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
   case $OPTION in
     c) catalogs=$OPTARG ;;
     d) CREATE_DIR=$OPTARG ;;
@@ -25,7 +24,6 @@ while getopts "uh:L:vo:t:T:d:r:ce:l:D:O:z:" OPTION; do
     h) echo "Read the instructions"
         exit ;;
     l) log=$OPTARG ;;
-    L) KEEP_LINKS=$OPTARG ;;
     o) outname=$OPTARG ;;
 	O) outdir=$OPTARG ;;
     r) drill=$OPTARG ;;
@@ -106,12 +104,6 @@ then
 		$PERL $DIR/Info_extract2.pl $CREATE_DIR/${outname}.vcf -q $DRILLS|grep -v "^##" >  $CREATE_DIR/${outname}.tsv
 	fi
 fi	
-
-if [[ "$KEEP_LINKS" == "FALSE" ]]
-then
-  perl -i -pe "s#;*Link_.*(|a>)##g" ${outname}.vcf
-  perl -i -pe "s/^##INFO=<ID=$//" ${outname}.vcf
-fi
 
 if [[ "$COMPRESS" == "yes" ]]
 then
