@@ -304,7 +304,7 @@ drills=`readlink -m ${drills}`
 VCF=`readlink -m ${VCF}`
 
 # PERLLIB should be set in the tool_info
-export PYTHONPATH=${PERLLIB}
+#export PYTHONPATH=${PERLLIB}
 #Needed for splitting multi-VCF
 export PERL5LIB=${PERL5LIB}
 export SCRIPT_DIR=${BIOR_ANNOTATE_DIR}/scripts

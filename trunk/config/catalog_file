@@ -1,7 +1,7 @@
-Clinvar_20151008_GRCh37	bior_same_variant	/data5/bsi/catalogs/bior/v1/ClinVar/20151008_GRCh37/variants_nodups.v1/macarthur-lab_xml_txt.tsv.bgz
-ExAC_r03_GRCh37_nodups	bior_same_variant	/data5/bsi/catalogs/bior/v1/ExAC/r0.3_GRCh37/variants_nodups.v1/ExAC.r0.3.sites.vep.vcf.tsv.bgz
-HGMD_2015Q2_GRCh37_nodups	bior_same_variant	/data5/bsi/catalogs/bior/v1/HGMD/2015.2_GRCh37/variants_nodups.v1/HGMD_PRO_2015.2.vcf.tsv.bgz
+Clinvar_20170116_GRCh37	bior_same_variant	/data5/bsi/catalogs/user/v1/Clinvar/2017_01_07/macarthur-lab_xml.tsv.bgz
+HGMD_2016Q1_GRCh37_nodups	bior_same_variant	/data5/bsi/catalogs/bior/v1/HGMD/2016.1_GRCh37/variants.nodups.v1/HGMD_PRO_2016.1.vcf.tsv.bgz
 dbSNP_142_GRCh37p13	bior_same_variant	/data5/bsi/catalogs/bior/v1/dbSNP/142_GRCh37.p13/variants_nodups.v1/00-All.vcf.tsv.bgz
 dbNSFP_v3a_GRCh37	bior_same_variant	/data5/bsi/catalogs/bior/v1/dbNSFP/3.0a_GRCh37/variants_nodups.v1/dbNSFPv3.0a.zip.tsv.bgz
-ESP_V2_GRCh37	bior_same_variant	/data5/bsi/catalogs/bior/v1/ESP/V2_GRCh37/variants.nodups.v1/ESP6500.vcf.tsv.bgz
-1000genomes_20130502_GRCh37_nodups	bior_same_variant	/data5/bsi/catalogs/bior/v1/1000_genomes/20130502_GRCh37/variants_nodups.v1/ALL.wgs.sites.vcf.tsv.bgz
+noTCGA_ExAc	bior_same_variant	/data5/bsi/catalogs/user/v1/ExAc/2016_03_10/ExAC.noTCGA.tsv.bgz
+Tavtigen_domains	bior_overlap	/data5/bsi/epibreast/m087494.couch/Couch/Huge_Breast_VCF/SuperControls/SubProjects/domainAnnotation/results/2016_06_15/Tavtigen_domains_2.catalog.gz
+pfam_domains	bior_overlap	/data5/bsi/catalogs/user/v1/pfam_functional_domain/2015_06_17/pfam_domains.tsv.gz
