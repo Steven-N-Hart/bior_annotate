@@ -1,0 +1,1 @@
+The branch mmeiners_speedMemoryAndSpaceImprovements is based off tag v3.0.1.  Currently tho, there is already v3.0.2 and v3.1 out there on GitHub
