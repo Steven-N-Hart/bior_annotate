@@ -40,7 +40,9 @@ then
 fi
 source "$tool_info"
 source "$MEM_INFO"
-source "$BIOR_PROFILE"
+# source "$BIOR_PROFILE"
+# Add BIOR bin to path
+export PATH=$BIOR:$PATH
 source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
 source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
 

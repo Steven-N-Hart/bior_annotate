@@ -54,7 +54,11 @@ then
 fi
 
 source $tool_info
-source $BIOR_PROFILE
+# source $BIOR_PROFILE
+# Add BIOR bin to path  (NOTE: The variable $BIOR includes the ./bin subdir)
+export PATH=$BIOR:$PATH
+export BIOR_LITE_HOME=`dirname $BIOR`
+
 source "${BIOR_ANNOTATE_DIR}/utils/log.sh"
 source "${BIOR_ANNOTATE_DIR}/scripts/shared_functions.sh"
 
@@ -97,15 +101,32 @@ do
     exit 100
   fi
 
-  log "Attempting to annotate VCF"
+  ###-------------------------------------------------------------------------------------
+  ### Annotate the VCF...
+  ###-------------------------------------------------------------------------------------
+  
 
-  cat $VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/$CATALOG_COMMAND -d $CATALOG -l | eval ${BIOR}/bior_drill ${drill_opts} | ${BIOR}/bior_tjson_to_vcf -l > $CWD_VCF.$count
+  ##-----------------------------------------------
+  ## MIKE - Remove the bior_vcf_to_tjson and bior_tjson_to_vcf cmds after each step - only do at beginning and end
+  ## If this is the first file in the process, then run bior_vcf_to_tjson on it
+  ##-----------------------------------------------
+  # If it's the first file, then use bior_vcf_to_tjson, else just cat the file again (straight pass-thru)
+  VCF_TO_TJSON="${BIOR}/bior_vcf_to_tjson -lf $CWD_VCF.$count.vcfToTjson.log"
+  if [ "$count" != 1 ] ; then
+    VCF_TO_TJSON="cat"
+  fi
+
+  # Since we've stripped off columns after 8, the bior_vcf_to_tjson should add JSON to column 9
+  VCF_JSON_COL=9
+  cmd="cat $VCF | eval $VCF_TO_TJSON | ${BIOR}/$CATALOG_COMMAND -d $CATALOG -l  -c $VCF_JSON_COL | eval ${BIOR}/bior_drill ${drill_opts}  > $CWD_VCF.$count"
+  eval ${cmd}
+
 
   START_NUM=`cat $VCF | grep -v '^#' | wc -l`
   END_NUM=`cat $CWD_VCF.$count | grep -v '^#' | wc -l`
   if [[ ! -s $CWD_VCF.${count} || ! $END_NUM -ge $START_NUM ]]
   then
-    log_error "Attempting to execute: cat $VCF | ${BIOR}/bior_vcf_to_tjson | ${BIOR}/$CATALOG_COMMAND -d $CATALOG -l | eval ${BIOR}/bior_drill ${drill_opts} | ${BIOR}/bior_tjson_to_vcf -l > $CWD_VCF.$count"
+    log_error "Attempted to execute: $cmd"
     log_error "`which java`"
     ${BIOR_ANNOTATE_DIR}/scripts/email.sh -f $CWD_VCF.${count} -m annotate.sh -M "bior annotation failed using $CATALOG_FILE" -p $VCF -l $LINENO
     exit 100
@@ -124,5 +145,6 @@ do
   VCF=${CWD_VCF}.${count}
 done <$DRILL_FILE
 
-$PERL -pne 's/bior.//g' $CWD_VCF.${count} > ${CWD_VCF}.anno 
+## Strip out any "bior." prefixes, pass thru bior_tjson_to_vcf
+$PERL -pne 's/bior.//g' $CWD_VCF.${count} |  bior_tjson_to_vcf -lf ${CWD_VCF}.tjsonToVcf.log > ${CWD_VCF}.anno 
 check_file ${CWD_VCF}.anno

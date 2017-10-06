@@ -1,11 +1,14 @@
 #If you have any defaults you want to override, specify them below this line
 
-BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk"
+# BIOR_ANNOTATE_DIR="/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk"
+# BIOR_ANNOTATE_DIR="/data5/bsi/bictools/scripts/bior_annotate/v3.0.1/trunk/"
+BIOR_ANNOTATE_DIR="/home/m054457/Tools/BiorAnnotate/v3.0.1/trunk/"
 
 SGE_BASE="/home/oge/ge2011.11/bin/linux-x64/"
 PERL="/usr/local/biotools/perl/5.16.2-centos6/bin/perl"
 PERLLIB="/data5/bsi/bictools/perl/perl5/lib/perl5:/data5/bsi/bictools/perl/perl5/lib/perl5/x86_64-linux"
 JAVA7="/usr/local/biotools/java/jdk1.7.0_03/bin"
+GROOVY_HOME="/data5/bsi/bictools/src/groovy/2.4.7/"
 
 PYTHON="/usr/local/biotools/python/2.7.10/bin"
 PYTHONLIB="/data5/bsi/bictools/lib/python/2.7.10/lib/python2.7/site-packages:/home/biotools/python/2.7.10/lib/python2.7/site-packages"
@@ -20,8 +23,8 @@ REF_GENOME="/data2/bsi/reference/sequence/human/ncbi/hg19/allchr.fa"
 CAVA=/data5/bsi/epibreast/m087494.couch/Scripts/CAVA/cava.py
 CAVA_CONFIG=/data5/bsi/epibreast/m087494.couch/Scripts/VCF_utilities/bior_annotate/trunk/config/cava_config.txt
 
-BIOR="/usr/local/biotools/bior_scripts/2.4.2/bior_pipeline-2.4.2/bin"
-BIOR_PROFILE=${BIOR}/../../PKG_PROFILE
+BIOR="/usr/local/biotools/bior_scripts/4.3.0/bior_pipeline-4.3.0/bin"
+# BIOR_PROFILE=${BIOR}/../../PKG_PROFILE
 TABIX=/projects/bsi/bictools/apps/alignment/tabix/0.2.5
 BEDTOOLS=/projects/bsi/bictools/apps/misc/BEDTools/2.16.2/bin
 
