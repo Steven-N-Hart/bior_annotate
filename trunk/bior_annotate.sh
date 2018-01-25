@@ -43,7 +43,7 @@ cat << EOF
 ##              * Use -Q NA for standalone mode
 ##      -t    Export table as well as VCF [1]
 ##              -t 1: Separate columns for Depth, GQ, AD, and GT per sample
-##              -t 2: First N columns like VCF, one colulmn containing sample names
+##              -t 2: First N columns like VCF, one column containing sample names
 ##      -T    tool info file
 ##      -x    path to temp directory [default: cwd]
 ##      -z    specify yes or no to describe whether the final VCF should be compressed [default: yes]
